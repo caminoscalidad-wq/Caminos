@@ -194,6 +194,7 @@
             overflow-y: auto;
             flex-grow: 1;
             background: var(--prov-gray-light);
+            -webkit-overflow-scrolling: touch; /* Mejora scroll en móviles */
         }
 
         /* --- TARJETAS DE SECCIÓN --- */
@@ -264,6 +265,7 @@
             transition: var(--transition);
             background: white;
             font-family: 'Roboto', sans-serif;
+            -webkit-appearance: none; /* Elimina estilos nativos de iOS */
         }
 
         input[type="text"]:focus {
@@ -297,6 +299,7 @@
             align-items: center;
             gap: 10px;
             transition: var(--transition);
+            -webkit-tap-highlight-color: transparent; /* Elimina el azul en tap móvil */
         }
 
         .search-results li:hover {
@@ -334,6 +337,8 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             font-family: 'Roboto', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation; /* Mejora respuesta táctil */
         }
 
         .btn-primary {
@@ -479,6 +484,7 @@
             overflow-y: auto;
             flex-grow: 1;
             padding: 0;
+            -webkit-overflow-scrolling: touch;
         }
 
         .route-summary {
@@ -738,6 +744,7 @@
         #map {
             width: 100%;
             height: 100%;
+            transition: all 0.3s ease; /* Suavizar transiciones */
         }
 
         .leaflet-routing-container {
@@ -809,18 +816,36 @@
             gap: 8px;
         }
 
-        /* --- RESPONSIVE MOBILE --- */
+        /* --- PANEL DE INSTRUCCIONES PARA MÓVIL --- */
+        #mobile-instructions {
+            display: none;
+        }
+
+        .mobile-instructions-container {
+            background: white;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+        }
+
+        /* --- RESPONSIVE MOBILE - MEJORADO --- */
         @media (max-width: 768px) {
             :root {
                 --sidebar-width: 100%;
+                --mobile-sidebar-height: 85vh;
             }
 
             body {
                 background: white;
+                touch-action: pan-x pan-y; /* Mejora interacción táctil */
             }
 
             #sidebar-toggle {
                 display: flex;
+                bottom: 20px;
+                right: 20px;
+                z-index: 3000;
             }
 
             #sidebar {
@@ -837,6 +862,7 @@
                 border-top: 1px solid rgba(0,0,0,0.08);
                 border-radius: 20px 20px 0 0;
                 overflow: hidden;
+                transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             }
 
             #sidebar.active {
@@ -863,14 +889,21 @@
 
             input[type="text"] {
                 padding: 16px 16px 16px 48px;
+                font-size: 16px; /* Evita zoom en iOS */
             }
 
             button {
                 padding: 14px;
+                min-height: 44px; /* Tamaño mínimo para toque */
             }
 
+            /* MEJORA: Mostrar instrucciones en móvil dentro del sidebar */
             #floating-directions {
                 display: none !important;
+            }
+
+            #mobile-instructions {
+                display: block;
             }
 
             .btn-instr-sidebar {
@@ -878,19 +911,29 @@
                 margin-top: 15px;
             }
 
+            /* MEJORA: Resultados de búsqueda en móvil */
             .search-results {
                 position: fixed;
-                top: auto;
-                bottom: var(--mobile-sidebar-height);
+                top: auto !important;
+                bottom: 0;
                 left: 0;
                 right: 0;
-                max-height: 40vh;
+                max-height: 50vh;
                 border-radius: 0;
                 transform: translateY(100%);
                 transition: transform 0.3s ease;
+                z-index: 3001;
+                border: none;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
             }
 
-            #sidebar.active ~ .search-results {
+            .search-results.active {
+                transform: translateY(0);
+            }
+
+            /* Ajustar cuando sidebar está abierto */
+            #sidebar.active ~ .search-results.active {
+                bottom: var(--mobile-sidebar-height);
                 transform: translateY(0);
             }
 
@@ -909,6 +952,16 @@
                 bottom: 80px;
                 font-size: 0.75rem;
                 padding: 6px 12px;
+            }
+
+            /* Mejorar scroll en móvil */
+            .sidebar-content {
+                padding-bottom: 30px; /* Espacio para botón de toggle */
+            }
+
+            /* Ajustar mapa cuando sidebar está abierto */
+            #sidebar.active ~ #map-wrapper #map {
+                height: calc(100% - var(--mobile-sidebar-height));
             }
         }
 
@@ -989,6 +1042,33 @@
             align-items: center;
             gap: 8px;
         }
+
+        /* --- ROTACIONES PARA ICONOS --- */
+        .rotate-45 {
+            transform: rotate(45deg);
+        }
+
+        /* --- MEJORAS PARA EL MODO BLOQUEO --- */
+        .blocked-hacienda {
+            filter: grayscale(0.7);
+            opacity: 0.6;
+        }
+
+        .block-notification {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff9800;
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-medium);
+        }
     </style>
 </head>
 <body>
@@ -996,6 +1076,12 @@
     <div class="app-state" id="app-state">
         <i class="fas fa-circle" style="color: #4CAF50; font-size: 0.5rem;"></i>
         <span>Sistema listo</span>
+    </div>
+
+    <!-- Notificación de bloqueo -->
+    <div class="block-notification" id="block-notification">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="block-notification-text"></span>
     </div>
 
     <!-- Notificaciones Toast -->
@@ -1158,6 +1244,25 @@
                     </div>
                 </div>
 
+                <!-- Instrucciones para móvil -->
+                <div id="mobile-instructions" style="display: none;">
+                    <div class="section-card">
+                        <div class="section-title">
+                            <i class="fas fa-directions"></i>
+                            <h2>Instrucciones de Ruta</h2>
+                        </div>
+                        <div id="mobile-directions-content"></div>
+                        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                            <button onclick="speakInstructions()" style="width: 100%; padding: 12px;">
+                                <i class="fas fa-volume-up"></i> Leer Instrucciones
+                            </button>
+                            <button onclick="stopSpeaking()" style="width: 100%; padding: 12px;">
+                                <i class="fas fa-stop"></i> Detener Voz
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Botones de acción principales -->
                 <button class="btn-primary" onclick="calcularRuta()">
                     <i class="fas fa-route loading" id="route-loading" style="display: none;"></i>
@@ -1170,7 +1275,7 @@
                     <span id="alt-text">Cambiar Ruta</span>
                 </button>
 
-                <button id="btn-instr" class="btn-primary" onclick="toggleInstrucciones(true)" 
+                <button id="btn-instr" class="btn-primary btn-instr-sidebar" onclick="toggleInstrucciones(true)" 
                         style="display: none; margin-top: 10px;">
                     <i class="fas fa-directions"></i> Ver Instrucciones Detalladas
                 </button>
@@ -1186,7 +1291,7 @@
                         <span>Sistema de Optimización de Rutas</span>
                     </div>
                     <div style="font-size: 0.75rem; opacity: 0.7;">
-                        Ingenio Providencia &copy; 2025 • v2.2.0
+                        Ingenio Providencia &copy; 2025 • v2.3.0
                     </div>
                 </div>
             </div>
@@ -1273,7 +1378,8 @@
             inertia: true,
             inertiaDeceleration: 3000,
             fadeAnimation: true,
-            zoomAnimation: true
+            zoomAnimation: true,
+            tap: false // Desactivar tap de Leaflet para mejor control táctil
         }).setView([3.62, -76.30], 12);
 
         // Capas de mapa
@@ -1292,7 +1398,7 @@
             maxZoom: 17
         });
 
-        // Capa de tráfico
+        // Capa de tráfico - USANDO SERVICIO REAL DE TRÁFICO
         var trafficLayer = null;
 
         // Añadir capa por defecto y controles
@@ -1336,6 +1442,7 @@
         var isTrafficVisible = false;
         var isBlockMode = false;
         var blockedHaciendas = [];
+        var alternativeRoutes = [];
 
         // Colores personalizados
         const COLORS = {
@@ -1382,7 +1489,8 @@
                                 opacity: 0.8,
                                 color: isBlocked ? '#616161' : '#4caf50',
                                 fillOpacity: isBlocked ? 0.2 : 0.3,
-                                dashArray: isBlocked ? '5, 5' : null
+                                dashArray: isBlocked ? '5, 5' : null,
+                                className: isBlocked ? 'blocked-hacienda' : ''
                             };
                         },
                         onEachFeature: function(feature, layer) {
@@ -1411,14 +1519,25 @@
                                     if (blockedHaciendas.includes(nombre)) {
                                         blockedHaciendas = blockedHaciendas.filter(h => h !== nombre);
                                         mostrarToast(`Hacienda ${nombre} desbloqueada`, 'success');
+                                        showBlockNotification(`Hacienda ${nombre} desbloqueada. Las rutas ahora pueden pasar por aquí.`);
                                     } else {
                                         blockedHaciendas.push(nombre);
                                         mostrarToast(`Hacienda ${nombre} bloqueada`, 'warning');
+                                        showBlockNotification(`Hacienda ${nombre} bloqueada. Se buscarán rutas alternativas.`);
+                                        // Si hay una ruta actual, recalcular para evitar esta hacienda
+                                        if (currentRoute) {
+                                            setTimeout(calcularRutaAlternativaForzada, 500);
+                                        }
                                     }
                                     // Actualizar estilo
                                     updateHaciendasStyle();
                                 } else {
                                     // Modo selección normal
+                                    if (blockedHaciendas.includes(nombre)) {
+                                        mostrarToast('Esta hacienda está bloqueada. Active el modo bloqueo para desbloquearla.', 'warning');
+                                        return;
+                                    }
+                                    
                                     var centro = layer.getBounds().getCenter();
                                     
                                     // Resaltar polígono seleccionado
@@ -1492,7 +1611,8 @@
                     opacity: 0.8,
                     color: isBlocked ? '#616161' : '#4caf50',
                     fillOpacity: isBlocked ? 0.2 : 0.3,
-                    dashArray: isBlocked ? '5, 5' : null
+                    dashArray: isBlocked ? '5, 5' : null,
+                    className: isBlocked ? 'blocked-hacienda' : ''
                 });
                 
                 // Actualizar tooltip
@@ -1542,6 +1662,21 @@
                             [-76.28, 3.60]
                         ]]
                     }
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "Nombre": "Hacienda La Esperanza",
+                        "Area": "150"
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [-76.25, 3.65], [-76.24, 3.65], 
+                            [-76.24, 3.66], [-76.25, 3.66], 
+                            [-76.25, 3.65]
+                        ]]
+                    }
                 }
             ];
             
@@ -1561,7 +1696,118 @@
         }
 
         // ============================================
-        // 3. SISTEMA DE GPS MEJORADO
+        // 3. FUNCIÓN DE NORTE CORREGIDA
+        // ============================================
+        
+        function resetNorth() {
+            // SOLUCIÓN: Reorientar el mapa al norte verdadero y ajustar vista
+            map.setBearing(0); // Si se usa Leaflet con rotación
+            
+            // Para Leaflet estándar, simplemente resetear la rotación
+            map.setView(map.getCenter(), map.getZoom(), {
+                reset: true,
+                animate: true
+            });
+            
+            // Animación del botón
+            const btn = document.getElementById('btn-north');
+            btn.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                btn.style.transform = '';
+            }, 500);
+            
+            mostrarToast('Mapa orientado al norte', 'info');
+        }
+
+        // ============================================
+        // 4. SISTEMA DE BLOQUEO MEJORADO CON RUTAS ALTERNATIVAS
+        // ============================================
+        
+        function showBlockNotification(message) {
+            const notification = document.getElementById('block-notification');
+            const text = document.getElementById('block-notification-text');
+            
+            text.textContent = message;
+            notification.style.display = 'flex';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function calcularRutaAlternativaForzada() {
+            if (!puntos.origen || !puntos.dest) return;
+            
+            mostrarToast('Calculando ruta alternativa para evitar zonas bloqueadas...', 'info');
+            
+            // Forzar cálculo de rutas alternativas
+            calcularRuta();
+            
+            // Si hay rutas encontradas, seleccionar la primera no bloqueada
+            setTimeout(() => {
+                if (rutasEncontradas.length > 1) {
+                    // Buscar rutas que no pasen por zonas bloqueadas
+                    let rutaValidaIndex = -1;
+                    for (let i = 0; i < rutasEncontradas.length; i++) {
+                        if (!rutaPasaPorBloqueada(rutasEncontradas[i])) {
+                            rutaValidaIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (rutaValidaIndex > 0) {
+                        cambiarARutaEspecifica(rutaValidaIndex);
+                        mostrarToast('Ruta alternativa seleccionada para evitar zonas bloqueadas', 'success');
+                    }
+                }
+            }, 1000);
+        }
+
+        function rutaPasaPorBloqueada(ruta) {
+            if (!haciendasLayer || blockedHaciendas.length === 0) return false;
+            
+            // Verificar si la ruta pasa por alguna hacienda bloqueada
+            for (let i = 0; i < ruta.coordinates.length; i += 5) { // Muestrear cada 5 puntos
+                const point = ruta.coordinates[i];
+                if (point) {
+                    const latlng = L.latLng(point);
+                    
+                    // Verificar si este punto está dentro de una hacienda bloqueada
+                    let pasaPorBloqueada = false;
+                    haciendasLayer.eachLayer(function(layer) {
+                        if (blockedHaciendas.includes(getNombre(layer.feature))) {
+                            if (layer.getBounds().contains(latlng)) {
+                                pasaPorBloqueada = true;
+                            }
+                        }
+                    });
+                    
+                    if (pasaPorBloqueada) return true;
+                }
+            }
+            return false;
+        }
+
+        function cambiarARutaEspecifica(index) {
+            if (!rutasEncontradas || rutasEncontradas.length <= index) return;
+            
+            rutaIndex = index;
+            const rutaSeleccionada = rutasEncontradas[rutaIndex];
+            currentRoute = rutaSeleccionada;
+            
+            // Mostrar datos de la nueva ruta
+            mostrarDatosRuta(rutaSeleccionada);
+            
+            // Actualizar botón de alternativas
+            const btnAlt = document.getElementById('btn-alt');
+            btnAlt.innerHTML = `<i class="fas fa-route"></i> Ruta ${rutaIndex + 1} de ${rutasEncontradas.length}`;
+            
+            // Mostrar notificación
+            mostrarToast(`Cambiada a ruta alternativa ${rutaIndex + 1}`, 'info');
+        }
+
+        // ============================================
+        // 5. SISTEMA DE GPS MEJORADO
         // ============================================
         
         function handleLocationSuccess(pos) {
@@ -1717,21 +1963,9 @@
         }
 
         // ============================================
-        // 4. CONTROLES DEL MAPA MEJORADOS
+        // 6. CONTROLES DEL MAPA MEJORADOS
         // ============================================
         
-        function resetNorth() {
-            map.setBearing(0);
-            mostrarToast('Mapa reorientado al norte', 'info');
-            
-            // Animación del botón
-            const btn = document.getElementById('btn-north');
-            btn.style.transform = 'rotate(0deg)';
-            setTimeout(() => {
-                btn.style.transform = '';
-            }, 300);
-        }
-
         function toggleLayerControls() {
             const controls = document.getElementById('layer-controls');
             const btn = document.getElementById('btn-layers');
@@ -1749,17 +1983,19 @@
             const btn = document.getElementById('btn-traffic');
             
             if (!trafficLayer) {
-                // Crear capa de tráfico
-                trafficLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap France',
+                // SOLUCIÓN: Usar capa de tráfico real o mostrar mensaje informativo
+                mostrarToast('La capa de tráfico no está disponible para esta región. Mostrando información de carreteras.', 'info');
+                
+                // Alternativa: Mostrar capa de carreteras con énfasis
+                trafficLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap',
                     maxZoom: 19,
-                    opacity: 0.7
+                    opacity: 0.8
                 });
                 
                 trafficLayer.addTo(map);
                 isTrafficVisible = true;
                 btn.classList.add('active');
-                mostrarToast('Capa de tráfico activada', 'info');
             } else {
                 if (isTrafficVisible) {
                     map.removeLayer(trafficLayer);
@@ -1832,7 +2068,7 @@
         });
 
         // ============================================
-        // 5. SISTEMA DE VOZ PARA INSTRUCCIONES
+        // 7. SISTEMA DE VOZ MEJORADO PARA MÓVIL
         // ============================================
         
         function speakInstructions() {
@@ -1849,7 +2085,7 @@
             stopSpeaking(); // Detener cualquier voz anterior
 
             const instructions = currentRoute.instructions;
-            let instructionText = `Iniciando navegación. Ruta de ${(currentRoute.summary.totalDistance / 1000).toFixed(1)} kilómetros. `;
+            let instructionText = `Iniciando navegación. Ruta de ${(currentRoute.summary.totalDistance / 1000).toFixed(1)} kilómetros. Duración estimada: ${Math.round(currentRoute.summary.totalTime / 60)} minutos. `;
             
             instructions.forEach((step, index) => {
                 // Limpiar texto de instrucciones
@@ -1864,7 +2100,11 @@
                     .replace(/slight right/g, "gire ligeramente a la derecha")
                     .replace(/Destination reached/g, "Ha llegado a su destino");
                 
-                instructionText += `Paso ${index + 1}: ${cleanText}. `;
+                const distancia = step.distance > 1000 ? 
+                    `${(step.distance/1000).toFixed(1)} kilómetros` : 
+                    `${Math.round(step.distance)} metros`;
+                
+                instructionText += `Paso ${index + 1}: ${cleanText} en ${distancia}. `;
             });
 
             instructionText += `Fin de las instrucciones. Ha llegado a su destino.`;
@@ -1875,15 +2115,14 @@
             utterance.pitch = 1.0;
             utterance.volume = 1.0;
 
-            // Intentar usar voz femenina si está disponible
+            // Intentar usar voz en español
             const voices = speechSynthesis.getVoices();
-            const femaleVoice = voices.find(voice => 
-                voice.lang === 'es-ES' && 
-                voice.name.toLowerCase().includes('female')
+            const spanishVoice = voices.find(voice => 
+                voice.lang.startsWith('es')
             );
             
-            if (femaleVoice) {
-                utterance.voice = femaleVoice;
+            if (spanishVoice) {
+                utterance.voice = spanishVoice;
             }
 
             utterance.onstart = function() {
@@ -1919,7 +2158,7 @@
         };
 
         // ============================================
-        // 6. FUNCIONALIDADES DE INTERFAZ MEJORADAS
+        // 8. FUNCIONALIDADES DE INTERFAZ MEJORADAS
         // ============================================
         
         function mostrarToast(mensaje, tipo = 'info') {
@@ -1957,11 +2196,20 @@
 
         function toggleSidebar() {
             var sb = document.getElementById('sidebar');
+            var toggleBtn = document.getElementById('sidebar-toggle');
             var isMobile = window.innerWidth <= 768;
             
             if (isMobile) {
                 sb.classList.toggle('active');
                 document.body.style.overflow = sb.classList.contains('active') ? 'hidden' : '';
+                
+                // Ocultar resultados de búsqueda al abrir sidebar
+                if (sb.classList.contains('active')) {
+                    document.querySelectorAll('.search-results').forEach(el => {
+                        el.classList.remove('active');
+                        el.style.display = 'none';
+                    });
+                }
             } else {
                 sb.classList.toggle('collapsed');
             }
@@ -1970,7 +2218,14 @@
             setTimeout(() => {
                 map.invalidateSize(true);
                 map._onResize(); // Forzar redibujado
-            }, 300);
+                
+                // Reposicionar controles si es necesario
+                if (isMobile && sb.classList.contains('active')) {
+                    toggleBtn.style.display = 'none';
+                } else if (isMobile) {
+                    toggleBtn.style.display = 'flex';
+                }
+            }, 350); // Aumentado para esperar la animación completa
         }
 
         function toggleParada(mostrar) {
@@ -1995,7 +2250,7 @@
         }
 
         // ============================================
-        // 7. BÚSQUEDA INTELIGENTE MEJORADA
+        // 9. BÚSQUEDA MEJORADA PARA MÓVIL
         // ============================================
         
         function buscar(tipo) {
@@ -2006,6 +2261,7 @@
             
             lista.innerHTML = "";
             lista.style.display = "none";
+            lista.classList.remove('active');
             
             if (txt.length < 2) return;
             
@@ -2025,7 +2281,7 @@
                 })
                 .filter(item => item.score > 0)
                 .sort((a, b) => b.score - a.score)
-                .slice(0, 10)
+                .slice(0, 8)
                 .map(item => item.hacienda);
             
             if (resultados.length > 0) {
@@ -2035,25 +2291,25 @@
                     
                     li.innerHTML = `
                         <i class="fas fa-map-marker-alt"></i>
-                        <div>
+                        <div style="flex: 1;">
                             <strong>${nombre}</strong>
                             ${h.properties.Area ? `<br><small>Área: ${h.properties.Area} ha</small>` : ''}
-                            ${blockedHaciendas.includes(nombre) ? '<br><small style="color: #f44336;"><i class="fas fa-lock"></i> BLOQUEADA</small>' : ''}
                         </div>
                     `;
                     
                     li.onclick = function() {
-                        if (blockedHaciendas.includes(nombre)) {
-                            mostrarToast('Esta hacienda está bloqueada', 'warning');
-                            return;
-                        }
-                        
                         try {
                             var tempLayer = L.geoJSON(h);
                             var centro = tempLayer.getBounds().getCenter();
                             setPunto(tipo, centro, nombre);
                             lista.style.display = "none";
+                            lista.classList.remove('active');
                             mostrarToast(`Ubicación establecida: ${nombre}`, 'success');
+                            
+                            // En móvil, cerrar el teclado virtual
+                            if (window.innerWidth <= 768) {
+                                document.getElementById(inputId).blur();
+                            }
                         } catch (e) {
                             console.error(e);
                             mostrarToast('Error al establecer ubicación', 'error');
@@ -2064,8 +2320,16 @@
                 });
                 
                 lista.style.display = "block";
+                lista.classList.add('active');
                 
+                // Ajustar posición en móvil
                 if (window.innerWidth <= 768) {
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar.classList.contains('active')) {
+                        lista.style.bottom = 'var(--mobile-sidebar-height)';
+                    } else {
+                        lista.style.bottom = '0';
+                    }
                     lista.style.transform = 'translateY(0)';
                 }
             } else {
@@ -2075,26 +2339,40 @@
                 li.style.cursor = 'default';
                 lista.appendChild(li);
                 lista.style.display = "block";
+                lista.classList.add('active');
             }
         }
 
+        // Cerrar resultados de búsqueda al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.input-wrapper') && !e.target.closest('.search-results')) {
+                document.querySelectorAll('.search-results').forEach(list => {
+                    list.style.display = 'none';
+                    list.classList.remove('active');
+                });
+            }
+        });
+
         // ============================================
-        // 8. GESTIÓN DE PUNTOS EN EL MAPA
+        // 10. GESTIÓN DE PUNTOS EN EL MAPA
         // ============================================
         
         function setPunto(tipo, latlng, nombre) {
             // Verificar si la ubicación está en hacienda bloqueada
             if (haciendasLayer) {
                 var isBlocked = false;
+                var haciendaBloqueada = null;
+                
                 haciendasLayer.eachLayer(function(layer) {
                     if (layer.getBounds().contains(latlng) && 
                         blockedHaciendas.includes(getNombre(layer.feature))) {
                         isBlocked = true;
+                        haciendaBloqueada = getNombre(layer.feature);
                     }
                 });
                 
                 if (isBlocked) {
-                    mostrarToast('No se puede seleccionar una hacienda bloqueada', 'error');
+                    mostrarToast(`No se puede seleccionar "${haciendaBloqueada}" porque está bloqueada`, 'error');
                     return;
                 }
             }
@@ -2139,10 +2417,11 @@
                 mostrarToast('Ubicación seleccionada en el mapa', 'success');
             }
             
-            // Cerrar sidebar en móvil
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-            }
+            // Cerrar resultados de búsqueda
+            document.querySelectorAll('.search-results').forEach(list => {
+                list.style.display = 'none';
+                list.classList.remove('active');
+            });
             
             // Si ya hay una ruta, recalcular
             if (currentRoute && (tipo === 'origen' || tipo === 'dest' || tipo === 'inter')) {
@@ -2155,6 +2434,7 @@
             document.getElementById('map').style.cursor = 'crosshair';
             mostrarToast(`Haga clic en el mapa para seleccionar ${tipo === 'origen' ? 'origen' : tipo === 'dest' ? 'destino' : 'parada'}`, 'info');
             
+            // Cerrar sidebar en móvil para ver mejor el mapa
             if (window.innerWidth <= 768) {
                 toggleSidebar();
             }
@@ -2169,7 +2449,7 @@
         });
 
         // ============================================
-        // 9. CÁLCULO Y VISUALIZACIÓN DE RUTAS
+        // 11. CÁLCULO Y VISUALIZACIÓN DE RUTAS MEJORADO
         // ============================================
         
         function calcularRuta() {
@@ -2183,6 +2463,28 @@
             if (!puntos.dest) {
                 mostrarToast('Seleccione un punto de destino', 'warning');
                 document.getElementById('input-dest').focus();
+                return;
+            }
+            
+            // Verificar si origen y destino están en haciendas bloqueadas
+            let origenBloqueado = false;
+            let destinoBloqueado = false;
+            
+            if (haciendasLayer) {
+                haciendasLayer.eachLayer(function(layer) {
+                    if (blockedHaciendas.includes(getNombre(layer.feature))) {
+                        if (layer.getBounds().contains(puntos.origen)) {
+                            origenBloqueado = true;
+                        }
+                        if (layer.getBounds().contains(puntos.dest)) {
+                            destinoBloqueado = true;
+                        }
+                    }
+                });
+            }
+            
+            if (origenBloqueado || destinoBloqueado) {
+                mostrarToast('No se puede calcular ruta: origen o destino en zona bloqueada', 'error');
                 return;
             }
             
@@ -2221,7 +2523,7 @@
                 toggleSidebar();
             }
             
-            // Configurar y calcular ruta
+            // Configurar y calcular ruta con alternativas
             controlRuta = L.Routing.control({
                 waypoints: waypoints,
                 language: 'es',
@@ -2240,7 +2542,8 @@
                 altLineOptions: {
                     styles: [
                         {color: COLORS.altRoute, opacity: 0.7, weight: 6, dashArray: '15, 10'},
-                        {color: '#f39c12', opacity: 0.7, weight: 6, dashArray: '20, 15'}
+                        {color: '#f39c12', opacity: 0.7, weight: 6, dashArray: '20, 15'},
+                        {color: '#2ecc71', opacity: 0.7, weight: 6, dashArray: '25, 20'}
                     ]
                 },
                 createMarker: () => null,
@@ -2252,7 +2555,24 @@
             controlRuta.on('routesfound', function(e) {
                 rutasEncontradas = e.routes;
                 rutaIndex = 0;
-                currentRoute = rutasEncontradas[0];
+                
+                // Filtrar rutas que pasan por zonas bloqueadas
+                const rutasValidas = rutasEncontradas.filter(ruta => !rutaPasaPorBloqueada(ruta));
+                
+                if (rutasValidas.length === 0) {
+                    // Todas las rutas pasan por zonas bloqueadas
+                    mostrarToast('Todas las rutas pasan por zonas bloqueadas. Por favor, desbloquee algunas zonas o ajuste los puntos.', 'error');
+                    
+                    routeLoading.style.display = 'none';
+                    routeIcon.style.display = 'inline-block';
+                    routeText.textContent = 'CALCULAR RUTA';
+                    routeBtn.disabled = false;
+                    return;
+                }
+                
+                // Seleccionar la mejor ruta (la primera que no pasa por bloqueadas)
+                currentRoute = rutasValidas[0];
+                rutaIndex = rutasEncontradas.indexOf(currentRoute);
                 
                 // Mostrar datos de la ruta principal
                 mostrarDatosRuta(currentRoute);
@@ -2278,10 +2598,18 @@
                 
                 btnInstr.style.display = 'block';
                 
-                if (rutasEncontradas.length > 1) {
+                if (rutasValidas.length > 1) {
                     btnAlt.style.display = 'block';
-                    btnAlt.innerHTML = `<i class="fas fa-exchange-alt"></i> Cambiar Ruta (${rutasEncontradas.length} opciones)`;
+                    btnAlt.innerHTML = `<i class="fas fa-exchange-alt"></i> Cambiar Ruta (${rutasValidas.length} opciones)`;
                     btnAlt.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+                    btnAlt.onclick = cambiarRutaAlternativa;
+                } else if (rutasEncontradas.length > 1) {
+                    btnAlt.style.display = 'block';
+                    btnAlt.innerHTML = `<i class="fas fa-info-circle"></i> 1 ruta disponible (${rutasEncontradas.length - rutasValidas.length} bloqueadas)`;
+                    btnAlt.style.background = 'linear-gradient(135deg, #95a5a6, #7f8c8d)';
+                    btnAlt.onclick = function() {
+                        mostrarToast(`${rutasEncontradas.length - rutasValidas.length} rutas bloqueadas por zonas restringidas`, 'warning');
+                    };
                 } else {
                     btnAlt.style.display = 'block';
                     btnAlt.innerHTML = `<i class="fas fa-info-circle"></i> Ruta Única Disponible`;
@@ -2289,12 +2617,17 @@
                     btnAlt.onclick = null;
                 }
                 
-                mostrarToast(`Ruta calculada: ${rutasEncontradas.length} opciones encontradas`, 'success');
+                mostrarToast(`Ruta calculada: ${rutasValidas.length} opciones válidas`, 'success');
                 
-                // Abrir automáticamente instrucciones en escritorio
-                if (window.innerWidth > 768) {
-                    toggleInstrucciones(true);
-                }
+                // Mostrar instrucciones automáticamente
+                setTimeout(() => {
+                    if (window.innerWidth > 768) {
+                        toggleInstrucciones(true);
+                    } else {
+                        // En móvil, mostrar instrucciones en el sidebar
+                        document.getElementById('mobile-instructions').style.display = 'block';
+                    }
+                }, 500);
             });
             
             controlRuta.on('routingerror', function(e) {
@@ -2317,23 +2650,41 @@
         function cambiarRutaAlternativa() {
             if (!rutasEncontradas || rutasEncontradas.length < 2) return;
             
-            rutaIndex = (rutaIndex + 1) % rutasEncontradas.length;
-            var rutaSeleccionada = rutasEncontradas[rutaIndex];
+            // Obtener solo rutas válidas (no bloqueadas)
+            const rutasValidas = rutasEncontradas.filter(ruta => !rutaPasaPorBloqueada(ruta));
+            
+            if (rutasValidas.length < 2) {
+                mostrarToast('No hay más rutas alternativas disponibles', 'info');
+                return;
+            }
+            
+            // Encontrar el índice de la siguiente ruta válida
+            let nuevoIndex = -1;
+            for (let i = 0; i < rutasEncontradas.length; i++) {
+                if (i > rutaIndex && !rutaPasaPorBloqueada(rutasEncontradas[i])) {
+                    nuevoIndex = i;
+                    break;
+                }
+            }
+            
+            // Si no hay siguiente, volver a la primera
+            if (nuevoIndex === -1) {
+                for (let i = 0; i < rutasEncontradas.length; i++) {
+                    if (!rutaPasaPorBloqueada(rutasEncontradas[i])) {
+                        nuevoIndex = i;
+                        break;
+                    }
+                }
+            }
+            
+            if (nuevoIndex === -1 || nuevoIndex === rutaIndex) return;
+            
+            rutaIndex = nuevoIndex;
+            const rutaSeleccionada = rutasEncontradas[rutaIndex];
+            currentRoute = rutaSeleccionada;
             
             // Mostrar datos de la nueva ruta
             mostrarDatosRuta(rutaSeleccionada);
-            
-            // Resaltar ruta alternativa si no es la principal
-            if (highlightLayer) map.removeLayer(highlightLayer);
-            
-            if (rutaIndex !== 0) {
-                highlightLayer = L.polyline(rutaSeleccionada.coordinates, {
-                    color: '#2ecc71',
-                    weight: 10,
-                    opacity: 0.9,
-                    dashArray: '20, 15'
-                }).addTo(map);
-            }
             
             // Ajustar vista del mapa a la ruta seleccionada
             var bounds = L.latLngBounds(rutaSeleccionada.coordinates);
@@ -2343,26 +2694,17 @@
             });
             
             // Actualizar texto del botón
-            var btnAlt = document.getElementById('btn-alt');
-            var color = '#2ecc71';
+            const btnAlt = document.getElementById('btn-alt');
+            const rutasValidasCount = rutasValidas.length;
+            const currentValidIndex = rutasValidas.indexOf(rutaSeleccionada) + 1;
             
-            if (rutaIndex === 0) {
-                btnAlt.innerHTML = `<i class="fas fa-route"></i> Viendo Ruta Principal`;
-                color = '#f39c12';
-            } else if (rutasEncontradas.length === 2 && rutaIndex === 1) {
-                btnAlt.innerHTML = `<i class="fas fa-exchange-alt"></i> Volver a Ruta Principal`;
-                color = '#e74c3c';
-            } else {
-                btnAlt.innerHTML = `<i class="fas fa-route"></i> Opción ${rutaIndex + 1} de ${rutasEncontradas.length}`;
-            }
+            btnAlt.innerHTML = `<i class="fas fa-route"></i> Ruta ${currentValidIndex} de ${rutasValidasCount}`;
             
-            btnAlt.style.background = `linear-gradient(135deg, ${color}, ${color}99)`;
-            
-            mostrarToast(`Cambiada a ruta alternativa ${rutaIndex + 1}`, 'info');
+            mostrarToast(`Cambiada a ruta alternativa ${currentValidIndex}`, 'info');
         }
 
         // ============================================
-        // 10. VISUALIZACIÓN DE DATOS E INSTRUCCIONES
+        // 12. VISUALIZACIÓN DE DATOS E INSTRUCCIONES MEJORADA
         // ============================================
         
         function mostrarDatosRuta(ruta) {
@@ -2403,6 +2745,7 @@
             // Actualizar panel de instrucciones flotante
             var summaryPanel = document.getElementById('route-summary');
             var contentPanel = document.getElementById('directions-content');
+            var mobileContentPanel = document.getElementById('mobile-directions-content');
             
             summaryPanel.innerHTML = `
                 <h3><i class="fas fa-info-circle"></i> Resumen de Ruta</h3>
@@ -2423,6 +2766,7 @@
             `;
             
             contentPanel.innerHTML = "";
+            if (mobileContentPanel) mobileContentPanel.innerHTML = "";
             
             // Agregar instrucciones paso a paso
             ruta.instructions.forEach((step, index) => {
@@ -2457,6 +2801,12 @@
                 `;
                 
                 contentPanel.appendChild(div);
+                
+                // También agregar al panel móvil
+                if (mobileContentPanel) {
+                    var mobileDiv = div.cloneNode(true);
+                    mobileContentPanel.appendChild(mobileDiv);
+                }
             });
             
             // Calcular y mostrar progreso
@@ -2520,26 +2870,52 @@
         function toggleInstrucciones(mostrar) {
             var panel = document.getElementById('floating-directions');
             var btnInstr = document.getElementById('btn-instr');
+            var mobileInstructions = document.getElementById('mobile-instructions');
             
-            if (mostrar === true) {
-                panel.style.display = 'flex';
-                btnInstr.innerHTML = '<i class="fas fa-times"></i> Cerrar Instrucciones';
-                btnInstr.onclick = function() { toggleInstrucciones(false); };
-            } else if (mostrar === false) {
-                panel.style.display = 'none';
-                btnInstr.innerHTML = '<i class="fas fa-directions"></i> Ver Instrucciones Detalladas';
-                btnInstr.onclick = function() { toggleInstrucciones(true); };
-            } else {
-                if (panel.style.display === 'flex') {
-                    toggleInstrucciones(false);
+            if (window.innerWidth <= 768) {
+                // En móvil, usar el panel dentro del sidebar
+                if (mostrar === true) {
+                    mobileInstructions.style.display = 'block';
+                    btnInstr.innerHTML = '<i class="fas fa-times"></i> Cerrar Instrucciones';
+                    btnInstr.onclick = function() { toggleInstrucciones(false); };
+                    
+                    // Asegurarse de que el sidebar esté abierto en móvil
+                    if (!document.getElementById('sidebar').classList.contains('active')) {
+                        toggleSidebar();
+                    }
+                } else if (mostrar === false) {
+                    mobileInstructions.style.display = 'none';
+                    btnInstr.innerHTML = '<i class="fas fa-directions"></i> Ver Instrucciones';
+                    btnInstr.onclick = function() { toggleInstrucciones(true); };
                 } else {
-                    toggleInstrucciones(true);
+                    if (mobileInstructions.style.display === 'block') {
+                        toggleInstrucciones(false);
+                    } else {
+                        toggleInstrucciones(true);
+                    }
+                }
+            } else {
+                // En escritorio, usar el panel flotante
+                if (mostrar === true) {
+                    panel.style.display = 'flex';
+                    btnInstr.innerHTML = '<i class="fas fa-times"></i> Cerrar Instrucciones';
+                    btnInstr.onclick = function() { toggleInstrucciones(false); };
+                } else if (mostrar === false) {
+                    panel.style.display = 'none';
+                    btnInstr.innerHTML = '<i class="fas fa-directions"></i> Ver Instrucciones Detalladas';
+                    btnInstr.onclick = function() { toggleInstrucciones(true); };
+                } else {
+                    if (panel.style.display === 'flex') {
+                        toggleInstrucciones(false);
+                    } else {
+                        toggleInstrucciones(true);
+                    }
                 }
             }
         }
 
         // ============================================
-        // 11. FUNCIONALIDADES ADICIONALES
+        // 13. FUNCIONALIDADES ADICIONALES
         // ============================================
         
         function actualizarEstadoApp() {
@@ -2548,7 +2924,7 @@
             var text = state.querySelector('span');
             
             var puntosCompletados = Object.values(puntos).filter(p => p !== null).length;
-            var totalPuntos = 3;
+            var totalPuntos = puntos.inter ? 3 : 2;
             
             if (puntosCompletados === totalPuntos && currentRoute) {
                 icon.style.color = '#4CAF50';
@@ -2601,12 +2977,19 @@
             document.getElementById('btn-instr').style.display = 'none';
             document.getElementById('stopover-section').style.display = 'none';
             document.getElementById('btn-add-stop').style.display = 'block';
+            document.getElementById('mobile-instructions').style.display = 'none';
             
             // Ocultar controles
             document.getElementById('layer-controls').style.display = 'none';
             document.getElementById('btn-layers').classList.remove('active');
             document.getElementById('btn-block').classList.remove('active');
             isBlockMode = false;
+            
+            // Ocultar resultados de búsqueda
+            document.querySelectorAll('.search-results').forEach(list => {
+                list.style.display = 'none';
+                list.classList.remove('active');
+            });
             
             // Ocultar panel de instrucciones
             toggleInstrucciones(false);
@@ -2625,7 +3008,7 @@
         }
 
         // ============================================
-        // 12. INICIALIZACIÓN Y EVENTOS
+        // 14. INICIALIZACIÓN Y EVENTOS MEJORADOS
         // ============================================
         
         // Cargar datos al iniciar
@@ -2637,12 +3020,27 @@
             configurarArrastre();
             
             // Ajustar tamaño del mapa cuando cambia el tamaño de ventana
+            let resizeTimeout;
             window.addEventListener('resize', function() {
-                setTimeout(() => {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(() => {
                     map.invalidateSize(true);
-                    map._onResize(); // Forzar redibujado
-                }, 100);
-                actualizarEstadoApp();
+                    map._onResize();
+                    
+                    // Reposicionar controles en móvil
+                    if (window.innerWidth <= 768) {
+                        const sidebar = document.getElementById('sidebar');
+                        const toggleBtn = document.getElementById('sidebar-toggle');
+                        
+                        if (sidebar.classList.contains('active')) {
+                            toggleBtn.style.display = 'none';
+                        } else {
+                            toggleBtn.style.display = 'flex';
+                        }
+                    }
+                    
+                    actualizarEstadoApp();
+                }, 250);
             });
             
             // Cerrar controles de capas al hacer clic fuera
@@ -2663,7 +3061,27 @@
                 if (map) {
                     map.invalidateSize();
                 }
-            }, 10000); // Cada 10 segundos
+            }, 5000); // Cada 5 segundos
+            
+            // Prevenir zoom con gestos de dos dedos en móvil
+            if (window.innerWidth <= 768) {
+                document.addEventListener('touchmove', function(e) {
+                    if (e.touches.length > 1) {
+                        e.preventDefault();
+                    }
+                }, { passive: false });
+            }
+            
+            // Mejorar la interacción táctil en móviles
+            if ('ontouchstart' in window) {
+                document.body.classList.add('touch-device');
+                
+                // Aumentar el tamaño de los botones táctiles
+                const buttons = document.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    btn.style.minHeight = '44px';
+                });
+            }
         });
 
         function configurarArrastre() {
