@@ -14,13 +14,8 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     
-    <!-- Leaflet Fullscreen -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.css" />
-    <script src="https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.js"></script>
-    
-    <!-- Font Awesome & Material Icons -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     
     <!-- Roboto Font -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -54,12 +49,12 @@
             padding: 0;
         }
 
-        body {
+        html, body {
             margin: 0;
             padding: 0;
             font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
-            height: 100vh;
-            display: flex;
+            height: 100%;
+            width: 100%;
             overflow: hidden;
             color: var(--prov-gray-dark);
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -68,8 +63,12 @@
         #app-container {
             display: flex;
             width: 100%;
-            height: 100%;
-            position: relative;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             overflow: hidden;
         }
         
@@ -110,6 +109,7 @@
             box-shadow: var(--shadow-medium);
             transition: var(--transition);
             flex-shrink: 0;
+            position: relative;
         }
 
         #sidebar.collapsed {
@@ -194,6 +194,7 @@
             overflow-y: auto;
             flex-grow: 1;
             background: var(--prov-gray-light);
+            -webkit-overflow-scrolling: touch;
         }
 
         /* --- TARJETAS DE SECCIÓN --- */
@@ -285,7 +286,7 @@
             max-height: 250px;
             overflow-y: auto;
             display: none;
-            z-index: 1000;
+            z-index: 2001;
             box-shadow: var(--shadow-medium);
         }
 
@@ -334,6 +335,8 @@
             letter-spacing: 0.5px;
             text-transform: uppercase;
             font-family: 'Roboto', sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn-primary {
@@ -420,310 +423,27 @@
             background: linear-gradient(135deg, #1565c0, var(--prov-blue-alt));
         }
 
-        /* --- PANEL DE INSTRUCCIONES FLOTANTE MEJORADO --- */
-        #floating-directions {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 350px;
-            max-height: 80vh;
-            background: white;
-            border: none;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-heavy);
-            z-index: 1500;
+        /* --- PANEL DE INSTRUCCIONES EN SIDEBAR (MÓVIL) --- */
+        #mobile-directions {
             display: none;
-            overflow: hidden;
             flex-direction: column;
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.95);
+            height: 100%;
         }
 
-        #drag-handle {
-            padding: 15px;
+        #mobile-directions-header {
             background: linear-gradient(135deg, var(--prov-green-main), var(--prov-green-dark));
             color: white;
-            cursor: move;
-            font-weight: 600;
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-shrink: 0;
-            user-select: none;
         }
 
-        #drag-handle:active {
-            cursor: grabbing;
-        }
-
-        #close-float-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        #close-float-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: rotate(90deg);
-        }
-
-        #directions-content {
+        #mobile-directions-content {
+            flex-grow: 1;
             overflow-y: auto;
-            flex-grow: 1;
-            padding: 0;
-        }
-
-        .route-summary {
             padding: 15px;
-            background: var(--prov-green-lighter);
-            border-bottom: 1px solid #e0e0e0;
-            text-align: center;
-        }
-
-        .route-summary h3 {
-            color: var(--prov-green-dark);
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .route-stats {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-        }
-
-        .stat-item {
-            text-align: center;
-            flex: 1;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--prov-green-dark);
-            display: block;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--prov-gray-medium);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .instruction-step {
-            padding: 15px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: var(--transition);
-        }
-
-        .instruction-step:hover {
-            background: var(--prov-green-light);
-        }
-
-        .instruction-step:last-child {
-            border-bottom: none;
-        }
-
-        .step-icon {
-            background: var(--prov-green-light);
-            color: var(--prov-green-main);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .step-content {
-            flex-grow: 1;
-            min-width: 0;
-        }
-
-        .step-text {
-            font-size: 0.95rem;
-            line-height: 1.4;
-            color: var(--prov-gray-dark);
-        }
-
-        .step-dist {
-            font-weight: 700;
-            color: var(--prov-green-dark);
-            font-size: 0.9rem;
-            min-width: 60px;
-            text-align: right;
-            flex-shrink: 0;
-        }
-
-        /* --- INDICADORES DE PROGRESO --- */
-        .route-progress {
-            padding: 15px;
-            background: white;
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .progress-bar {
-            height: 6px;
-            background: #e0e0e0;
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--prov-green-main), var(--prov-green-dark));
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        .progress-text {
-            font-size: 0.85rem;
-            color: var(--prov-gray-medium);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* --- CONTROLES PERSONALIZADOS DEL MAPA --- */
-        .custom-controls-container {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .custom-control-btn {
-            background: white;
-            border: none;
-            border-radius: var(--border-radius);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-medium);
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--prov-gray-dark);
-            font-size: 1.1rem;
-        }
-
-        .custom-control-btn:hover {
-            background: var(--prov-green-light);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-heavy);
-            color: var(--prov-green-dark);
-        }
-
-        .custom-control-btn.active {
-            background: var(--prov-green-main);
-            color: white;
-        }
-
-        .layer-controls {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            z-index: 1000;
-            background: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-medium);
-            padding: 15px;
-            width: 200px;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .layer-controls h4 {
-            margin: 0 0 10px 0;
-            color: var(--prov-green-dark);
-            font-size: 1rem;
-        }
-
-        .layer-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .layer-item:last-child {
-            border-bottom: none;
-        }
-
-        .layer-item label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            color: var(--prov-gray-dark);
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 20px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 2px;
-            bottom: 2px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--prov-green-main);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(20px);
+            background: var(--prov-gray-light);
         }
 
         /* --- MAPA Y CONTROLES --- */
@@ -738,6 +458,7 @@
         #map {
             width: 100%;
             height: 100%;
+            touch-action: pan-x pan-y;
         }
 
         .leaflet-routing-container {
@@ -752,12 +473,6 @@
         }
 
         .leaflet-control-zoom {
-            border-radius: var(--border-radius) !important;
-            overflow: hidden;
-            box-shadow: var(--shadow-medium) !important;
-        }
-
-        .leaflet-control-fullscreen {
             border-radius: var(--border-radius) !important;
             overflow: hidden;
             box-shadow: var(--shadow-medium) !important;
@@ -809,6 +524,83 @@
             gap: 8px;
         }
 
+        /* --- CONTROLES DE BLOQUEO DE VÍAS --- */
+        .block-controls {
+            position: absolute;
+            top: 70px;
+            left: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            display: none;
+        }
+
+        .block-control-btn {
+            padding: 8px 12px;
+            background: white;
+            border: 2px solid var(--prov-red-route);
+            color: var(--prov-red-route);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .block-control-btn:hover {
+            background: #ffebee;
+        }
+
+        /* --- INSTRUCCIONES MÓVIL --- */
+        .mobile-instruction-step {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: var(--border-radius);
+        }
+
+        .mobile-step-icon {
+            background: var(--prov-green-light);
+            color: var(--prov-green-main);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .mobile-step-content {
+            flex-grow: 1;
+        }
+
+        .mobile-step-text {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: var(--prov-gray-dark);
+        }
+
+        .mobile-step-dist {
+            font-weight: 700;
+            color: var(--prov-green-dark);
+            font-size: 0.85rem;
+            min-width: 50px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
         /* --- RESPONSIVE MOBILE --- */
         @media (max-width: 768px) {
             :root {
@@ -817,6 +609,7 @@
 
             body {
                 background: white;
+                touch-action: none;
             }
 
             #sidebar-toggle {
@@ -825,35 +618,27 @@
 
             #sidebar {
                 position: fixed;
-                top: auto;
-                bottom: 0;
+                top: 0;
                 left: 0;
                 width: 100%;
-                height: var(--mobile-sidebar-height);
-                max-height: 100%;
-                transform: translateY(100%);
-                box-shadow: 0 -8px 32px rgba(0,0,0,0.2);
+                height: 100%;
+                transform: translateX(100%);
+                z-index: 3000;
                 border-right: none;
-                border-top: 1px solid rgba(0,0,0,0.08);
-                border-radius: 20px 20px 0 0;
-                overflow: hidden;
+                border-radius: 0;
             }
 
             #sidebar.active {
-                transform: translateY(0);
+                transform: translateX(0);
             }
 
             .sidebar-header {
-                border-radius: 20px 20px 0 0;
-                padding: 25px 20px 20px;
+                border-radius: 0;
+                padding: 20px;
             }
 
             .close-sidebar-btn {
                 display: flex;
-            }
-
-            #sidebar.active ~ #sidebar-toggle {
-                display: none;
             }
 
             .section-card {
@@ -863,52 +648,50 @@
 
             input[type="text"] {
                 padding: 16px 16px 16px 48px;
+                font-size: 16px; /* Evita zoom en iOS */
             }
 
             button {
                 padding: 14px;
             }
 
-            #floating-directions {
-                display: none !important;
-            }
-
-            .btn-instr-sidebar {
-                display: block !important;
-                margin-top: 15px;
-            }
-
             .search-results {
+                z-index: 3001;
+                max-height: 200px;
+                top: 100%;
                 position: fixed;
-                top: auto;
-                bottom: var(--mobile-sidebar-height);
+                width: 100%;
                 left: 0;
-                right: 0;
-                max-height: 40vh;
                 border-radius: 0;
-                transform: translateY(100%);
-                transition: transform 0.3s ease;
+                border: 1px solid var(--prov-green-light);
             }
 
-            #sidebar.active ~ .search-results {
-                transform: translateY(0);
+            /* Instrucciones en móvil dentro del sidebar */
+            #mobile-directions {
+                display: flex;
             }
 
-            .custom-controls-container {
-                top: 5px;
-                left: 5px;
+            #sidebar:not(.show-directions) #mobile-directions {
+                display: none;
             }
 
-            .custom-control-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
+            #sidebar:not(.show-directions) .sidebar-content {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #sidebar.show-directions .sidebar-content {
+                display: none;
             }
 
             #gps-status {
                 bottom: 80px;
                 font-size: 0.75rem;
                 padding: 6px 12px;
+                max-width: 90%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         }
 
@@ -951,27 +734,6 @@
             color: var(--prov-red-route);
         }
 
-        /* --- BADGES Y ETIQUETAS --- */
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-        }
-
-        .badge-primary {
-            background: var(--prov-green-light);
-            color: var(--prov-green-dark);
-        }
-
-        .badge-secondary {
-            background: #e3f2fd;
-            color: var(--prov-blue-alt);
-        }
-
         /* --- ESTADO DE LA APP --- */
         .app-state {
             position: absolute;
@@ -988,6 +750,38 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        /* --- BOTÓN NORTE --- */
+        #btn-north {
+            position: absolute;
+            top: 70px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border: none;
+            border-radius: var(--border-radius);
+            width: 40px;
+            height: 40px;
+            box-shadow: var(--shadow-medium);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--prov-gray-dark);
+        }
+
+        #btn-north:hover {
+            background: var(--prov-green-light);
+        }
+
+        /* --- CAPAS DE VÍAS BLOQUEADAS --- */
+        .blocked-road {
+            stroke-dasharray: 10, 10;
+            stroke: #f44336 !important;
+            stroke-width: 3 !important;
+            stroke-opacity: 0.7 !important;
         }
     </style>
 </head>
@@ -1010,43 +804,30 @@
         <span id="gps-status-text">GPS desconectado</span>
     </div>
 
+    <!-- Botón Norte -->
+    <button id="btn-north" title="Reorientar al Norte">
+        <i class="fas fa-compass"></i>
+    </button>
+
+    <!-- Controles de bloqueo de vías -->
+    <div class="block-controls" id="block-controls">
+        <button class="block-control-btn" onclick="startBlockingRoad()">
+            <i class="fas fa-draw-polygon"></i> Dibujar vía bloqueada
+        </button>
+        <button class="block-control-btn" onclick="clearBlockedRoads()">
+            <i class="fas fa-trash"></i> Limpiar bloqueos
+        </button>
+        <button class="block-control-btn" onclick="toggleBlockControls()">
+            <i class="fas fa-times"></i> Cerrar
+        </button>
+    </div>
+
     <!-- Contenedor principal -->
     <div id="app-container">
         <!-- Botón toggle sidebar (móvil) -->
         <button id="sidebar-toggle" onclick="toggleSidebar()">
             <i class="fas fa-route"></i>
         </button>
-
-        <!-- Panel de instrucciones flotante -->
-        <div id="floating-directions">
-            <div id="drag-handle">
-                <span><i class="fas fa-directions"></i> Instrucciones de Ruta</span>
-                <button id="close-float-btn" onclick="toggleInstrucciones(false)">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="route-summary" id="route-summary">
-                <!-- Resumen de ruta dinámico -->
-            </div>
-            <div id="directions-content"></div>
-            <div class="route-progress" id="route-progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="progress-text">
-                    <span>Progreso de ruta</span>
-                    <span id="progress-percent">0%</span>
-                </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button onclick="speakInstructions()" style="padding: 8px 12px; font-size: 0.8rem; flex: 1;">
-                        <i class="fas fa-volume-up"></i> Leer Instrucciones
-                    </button>
-                    <button onclick="stopSpeaking()" style="padding: 8px 12px; font-size: 0.8rem; flex: 1;">
-                        <i class="fas fa-stop"></i> Detener Voz
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <!-- Sidebar principal -->
         <aside id="sidebar">
@@ -1065,6 +846,7 @@
                 </button>
             </div>
 
+            <!-- Contenido principal del sidebar -->
             <div class="sidebar-content">
                 <!-- Sección Origen -->
                 <div class="section-card">
@@ -1087,11 +869,6 @@
                             <button class="btn-secondary" onclick="activarManual('origen')">
                                 <i class="fas fa-hand-pointer"></i> Seleccionar
                             </button>
-                        </div>
-                        <div class="form-info">
-                            <small style="color: var(--prov-gray-medium); display: block; margin-top: 8px;">
-                                <i class="fas fa-info-circle"></i> Seleccione ubicación inicial de transporte
-                            </small>
                         </div>
                     </div>
                 </div>
@@ -1147,6 +924,22 @@
                     </div>
                 </div>
 
+                <!-- Sección Controles -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <i class="fas fa-cogs"></i>
+                        <h2>Controles</h2>
+                    </div>
+                    <div class="btn-group" style="flex-direction: column; gap: 10px;">
+                        <button class="btn-secondary" onclick="toggleBlockControls()">
+                            <i class="fas fa-road"></i> Bloquear Vías
+                        </button>
+                        <button class="btn-secondary" onclick="showMobileInstructions()" id="btn-show-instructions">
+                            <i class="fas fa-directions"></i> Instrucciones de Voz
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Información de Ruta Calculada -->
                 <div class="section-card" id="route-info" style="display: none;">
                     <div class="section-title">
@@ -1170,91 +963,34 @@
                     <span id="alt-text">Cambiar Ruta</span>
                 </button>
 
-                <button id="btn-instr" class="btn-primary" onclick="toggleInstrucciones(true)" 
-                        style="display: none; margin-top: 10px;">
-                    <i class="fas fa-directions"></i> Ver Instrucciones Detalladas
-                </button>
-
                 <button class="btn-danger" onclick="limpiarTodo()">
                     <i class="fas fa-redo"></i> Nueva Consulta
                 </button>
+            </div>
 
-                <!-- Información de la app -->
-                <div style="padding: 20px 0; text-align: center; font-size: 0.8rem; color: var(--prov-gray-medium);">
-                    <div style="margin-bottom: 8px;">
-                        <i class="fas fa-leaf" style="color: var(--prov-green-main);"></i>
-                        <span>Sistema de Optimización de Rutas</span>
-                    </div>
-                    <div style="font-size: 0.75rem; opacity: 0.7;">
-                        Ingenio Providencia &copy; 2025 • v2.2.0
-                    </div>
+            <!-- Instrucciones móviles (ocultas por defecto) -->
+            <div id="mobile-directions">
+                <div id="mobile-directions-header">
+                    <h3 style="margin: 0; font-size: 1.1rem;">
+                        <i class="fas fa-directions"></i> Instrucciones de Ruta
+                    </h3>
+                    <button onclick="hideMobileInstructions()" style="background: none; border: none; color: white; font-size: 1.2rem;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="mobile-directions-content">
+                    <!-- Instrucciones dinámicas -->
+                </div>
+                <div style="padding: 15px; background: white; border-top: 1px solid #e0e0e0;">
+                    <button onclick="speakInstructions()" style="width: 100%; padding: 12px; background: var(--prov-green-main); color: white; border: none; border-radius: var(--border-radius);">
+                        <i class="fas fa-volume-up"></i> Leer Instrucciones
+                    </button>
                 </div>
             </div>
         </aside>
 
         <!-- Mapa principal -->
         <main id="map-wrapper">
-            <!-- Controles personalizados -->
-            <div class="custom-controls-container">
-                <button class="custom-control-btn" id="btn-north" onclick="resetNorth()" title="Reorientar al Norte">
-                    <i class="fas fa-compass"></i>
-                </button>
-                <button class="custom-control-btn" id="btn-layers" onclick="toggleLayerControls()" title="Controles de Capas">
-                    <i class="fas fa-layer-group"></i>
-                </button>
-                <button class="custom-control-btn" id="btn-traffic" onclick="toggleTraffic()" title="Mostrar/Ocultar Tráfico">
-                    <i class="fas fa-traffic-light"></i>
-                </button>
-                <button class="custom-control-btn" id="btn-block" onclick="toggleBlockMode()" title="Bloquear/Desbloquear Haciendas">
-                    <i class="fas fa-lock"></i>
-                </button>
-            </div>
-
-            <!-- Panel de controles de capas -->
-            <div class="layer-controls" id="layer-controls">
-                <h4>Controles de Capas</h4>
-                <div class="layer-item">
-                    <label>
-                        <i class="fas fa-tractor"></i>
-                        <span>Haciendas</span>
-                    </label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-haciendas" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="layer-item">
-                    <label>
-                        <i class="fas fa-road"></i>
-                        <span>Carreteras</span>
-                    </label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-calles" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="layer-item">
-                    <label>
-                        <i class="fas fa-satellite"></i>
-                        <span>Vista Satélite</span>
-                    </label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-satelite">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="layer-item">
-                    <label>
-                        <i class="fas fa-mountain"></i>
-                        <span>Topográfico</span>
-                    </label>
-                    <label class="switch">
-                        <input type="checkbox" id="toggle-topografico">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-
             <div id="map"></div>
         </main>
     </div>
@@ -1264,16 +1000,12 @@
         // 1. CONFIGURACIÓN INICIAL Y VARIABLES GLOBALES
         // ============================================
         
-        // Configuración del mapa con límites geográficos
+        // Configuración del mapa
         var map = L.map('map', {
-            zoomControl: false,
+            zoomControl: true,
+            zoomControlPos: 'topright',
             maxBounds: [[3.0, -77.0], [4.5, -75.5]],
-            maxBoundsViscosity: 0.8,
-            preferCanvas: true,
-            inertia: true,
-            inertiaDeceleration: 3000,
-            fadeAnimation: true,
-            zoomAnimation: true
+            maxBoundsViscosity: 0.8
         }).setView([3.62, -76.30], 12);
 
         // Capas de mapa
@@ -1287,27 +1019,8 @@
             maxZoom: 19
         });
 
-        var topografico = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenTopoMap',
-            maxZoom: 17
-        });
-
-        // Capa de tráfico
-        var trafficLayer = null;
-
-        // Añadir capa por defecto y controles
+        // Añadir capa por defecto
         calles.addTo(map);
-        L.control.zoom({ position: 'topright' }).addTo(map);
-        L.control.fullscreen({ position: 'topright' }).addTo(map);
-        
-        // Control de capas
-        var baseLayers = {
-            "Mapa Carreteras": calles,
-            "Vista Satélite": satelite,
-            "Mapa Topográfico": topografico
-        };
-        
-        L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
 
         // Variables globales
         var dbHaciendas = [];
@@ -1317,617 +1030,33 @@
         var rutasEncontradas = [];
         var rutaIndex = 0;
         var modoManual = null;
-        var highlightLayer = null;
-        var routeLayer = null;
         var currentRoute = null;
         var speechSynthesis = window.speechSynthesis;
         var currentSpeech = null;
 
-        // Variables para GPS en tiempo real
+        // Variables para GPS
         var locMarker = null;
         var locCircle = null;
         var locWatchId = null;
-        var gpsCentered = false;
 
-        // Variables para control de capas
-        var haciendasLayer = null;
-        var isHaciendasVisible = true;
-        var isCallesVisible = true;
-        var isTrafficVisible = false;
-        var isBlockMode = false;
-        var blockedHaciendas = [];
+        // Variables para bloqueo de vías
+        var blockedRoads = [];
+        var isBlockingMode = false;
+        var tempPolyline = null;
+        var drawingPoints = [];
 
-        // Colores personalizados
-        const COLORS = {
-            origin: '#2e7d32',
-            inter: '#fbc02d',
-            dest: '#d32f2f',
-            route: '#d32f2f',
-            altRoute: '#1976d2',
-            selectedPolygon: '#ff5722',
-            blockedPolygon: '#9e9e9e'
-        };
-
-        // Íconos personalizados
-        function createCustomIcon(type) {
-            return L.divIcon({
-                className: 'custom-marker ' + 'marker-' + type,
-                html: `<i class="fas fa-${type === 'origen' ? 'play' : type === 'inter' ? 'pause' : 'flag'}"></i>`,
-                iconSize: [30, 30],
-                iconAnchor: [15, 15],
-                popupAnchor: [0, -15]
-            });
-        }
+        // Variables para controles
+        var isMobile = window.innerWidth <= 768;
 
         // ============================================
-        // 2. CARGA DE DATOS GEOESPACIALES
+        // 2. FUNCIONES DE UTILIDAD
         // ============================================
-        
-        function cargarHaciendas() {
-            fetch('haciendas.geojson')
-                .then(res => {
-                    if(!res.ok) throw new Error("Error cargando datos geográficos");
-                    return res.json();
-                })
-                .then(data => {
-                    dbHaciendas = data.features;
-                    
-                    // Capa de haciendas con estilos mejorados
-                    haciendasLayer = L.geoJSON(data, {
-                        style: function(feature) {
-                            var isBlocked = blockedHaciendas.includes(getNombre(feature));
-                            return {
-                                fillColor: isBlocked ? COLORS.blockedPolygon : '#81c784',
-                                weight: isBlocked ? 3 : 2,
-                                opacity: 0.8,
-                                color: isBlocked ? '#616161' : '#4caf50',
-                                fillOpacity: isBlocked ? 0.2 : 0.3,
-                                dashArray: isBlocked ? '5, 5' : null
-                            };
-                        },
-                        onEachFeature: function(feature, layer) {
-                            var nombre = getNombre(feature);
-                            var area = feature.properties.Area ? `Área: ${feature.properties.Area} ha` : '';
-                            var isBlocked = blockedHaciendas.includes(nombre);
-                            
-                            layer.bindTooltip(`
-                                <div style="font-weight: bold; color: ${isBlocked ? '#616161' : '#1b5e20'}; margin-bottom: 5px;">
-                                    <i class="fas fa-${isBlocked ? 'lock' : 'tractor'}"></i> ${nombre}
-                                    ${isBlocked ? '<span style="color: #f44336; font-size: 0.8em;"> (BLOQUEADA)</span>' : ''}
-                                </div>
-                                ${area ? `<div style="font-size: 0.9em;">${area}</div>` : ''}
-                                <div style="font-size: 0.8em; color: #666; margin-top: 3px;">
-                                    ${isBlocked ? 'Haga clic para desbloquear' : 'Haga clic para seleccionar'}
-                                </div>
-                            `, {
-                                direction: 'top',
-                                sticky: true,
-                                className: 'custom-tooltip'
-                            });
-                            
-                            layer.on('click', function() {
-                                if (isBlockMode) {
-                                    // Modo bloqueo/desbloqueo
-                                    if (blockedHaciendas.includes(nombre)) {
-                                        blockedHaciendas = blockedHaciendas.filter(h => h !== nombre);
-                                        mostrarToast(`Hacienda ${nombre} desbloqueada`, 'success');
-                                    } else {
-                                        blockedHaciendas.push(nombre);
-                                        mostrarToast(`Hacienda ${nombre} bloqueada`, 'warning');
-                                    }
-                                    // Actualizar estilo
-                                    updateHaciendasStyle();
-                                } else {
-                                    // Modo selección normal
-                                    var centro = layer.getBounds().getCenter();
-                                    
-                                    // Resaltar polígono seleccionado
-                                    if (highlightLayer) {
-                                        map.removeLayer(highlightLayer);
-                                    }
-                                    
-                                    highlightLayer = L.geoJSON(feature, {
-                                        style: {
-                                            fillColor: COLORS.selectedPolygon,
-                                            weight: 4,
-                                            opacity: 0.9,
-                                            color: COLORS.selectedPolygon,
-                                            fillOpacity: 0.4
-                                        }
-                                    }).addTo(map);
-                                    
-                                    var tipoDestino = confirm("¿Establecer como destino? (Cancelar para origen)")
-                                        ? 'dest' : 'origen';
-                                    setPunto(tipoDestino, centro, nombre);
-                                }
-                            });
-                            
-                            layer.on('mouseover', function() {
-                                if (!blockedHaciendas.includes(nombre)) {
-                                    layer.setStyle({
-                                        fillOpacity: 0.6,
-                                        weight: 3,
-                                        color: '#2e7d32'
-                                    });
-                                }
-                            });
-                            
-                            layer.on('mouseout', function() {
-                                var isBlocked = blockedHaciendas.includes(nombre);
-                                layer.setStyle({
-                                    fillOpacity: isBlocked ? 0.2 : 0.3,
-                                    weight: isBlocked ? 3 : 2,
-                                    color: isBlocked ? '#616161' : '#4caf50'
-                                });
-                            });
-                        }
-                    }).addTo(map);
-                    
-                    mostrarToast('Datos geográficos cargados correctamente', 'success');
-                    
-                    // Ajustar vista a las haciendas
-                    if (dbHaciendas.length > 0) {
-                        var bounds = haciendasLayer.getBounds();
-                        map.fitBounds(bounds, { padding: [50, 50] });
-                    }
-                })
-                .catch(err => {
-                    console.warn("Advertencia: No se pudieron cargar los datos de haciendas");
-                    mostrarToast('Cargando datos locales...', 'warning');
-                    // Crear datos de ejemplo si no hay archivo
-                    crearDatosEjemplo();
-                });
-        }
 
-        function updateHaciendasStyle() {
-            if (!haciendasLayer) return;
-            
-            haciendasLayer.eachLayer(function(layer) {
-                var nombre = getNombre(layer.feature);
-                var isBlocked = blockedHaciendas.includes(nombre);
-                
-                layer.setStyle({
-                    fillColor: isBlocked ? COLORS.blockedPolygon : '#81c784',
-                    weight: isBlocked ? 3 : 2,
-                    opacity: 0.8,
-                    color: isBlocked ? '#616161' : '#4caf50',
-                    fillOpacity: isBlocked ? 0.2 : 0.3,
-                    dashArray: isBlocked ? '5, 5' : null
-                });
-                
-                // Actualizar tooltip
-                var area = layer.feature.properties.Area ? `Área: ${layer.feature.properties.Area} ha` : '';
-                layer.getTooltip().setContent(`
-                    <div style="font-weight: bold; color: ${isBlocked ? '#616161' : '#1b5e20'}; margin-bottom: 5px;">
-                        <i class="fas fa-${isBlocked ? 'lock' : 'tractor'}"></i> ${nombre}
-                        ${isBlocked ? '<span style="color: #f44336; font-size: 0.8em;"> (BLOQUEADA)</span>' : ''}
-                    </div>
-                    ${area ? `<div style="font-size: 0.9em;">${area}</div>` : ''}
-                    <div style="font-size: 0.8em; color: #666; margin-top: 3px;">
-                        ${isBlocked ? 'Haga clic para desbloquear' : 'Haga clic para seleccionar'}
-                    </div>
-                `);
-            });
-        }
-
-        function crearDatosEjemplo() {
-            // Datos de ejemplo para desarrollo
-            dbHaciendas = [
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "Nombre": "Hacienda Providencia",
-                        "Area": "120"
-                    },
-                    "geometry": {
-                        "type": "Polygon",
-                        "coordinates": [[
-                            [-76.31, 3.62], [-76.30, 3.62], 
-                            [-76.30, 3.63], [-76.31, 3.63], 
-                            [-76.31, 3.62]
-                        ]]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "Nombre": "Hacienda San José",
-                        "Area": "85"
-                    },
-                    "geometry": {
-                        "type": "Polygon",
-                        "coordinates": [[
-                            [-76.28, 3.60], [-76.27, 3.60], 
-                            [-76.27, 3.61], [-76.28, 3.61], 
-                            [-76.28, 3.60]
-                        ]]
-                    }
-                }
-            ];
-            
-            mostrarToast('Usando datos de ejemplo', 'info');
-        }
-
-        function getNombre(feature) {
-            if (!feature) return "Sin nombre";
-            if (typeof feature === 'object' && feature.feature) {
-                feature = feature.feature;
-            }
-            return feature.properties?.Nombre || 
-                   feature.properties?.name || 
-                   feature.properties?.NOMBRE || 
-                   feature.properties?.Hacienda || 
-                   "Ubicación sin nombre";
-        }
-
-        // ============================================
-        // 3. SISTEMA DE GPS MEJORADO
-        // ============================================
-        
-        function handleLocationSuccess(pos) {
-            const { latitude, longitude, accuracy } = pos.coords;
-            const latlng = L.latLng(latitude, longitude);
-
-            // Crear o actualizar marcador
-            if (!locMarker) {
-                locMarker = L.marker(latlng, {
-                    icon: L.divIcon({
-                        className: 'gps-marker',
-                        html: `<div style="background: #2196F3; border-radius: 50%; width: 20px; height: 20px; border: 3px solid white; box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);"></div>`,
-                        iconSize: [20, 20],
-                        iconAnchor: [10, 10]
-                    }),
-                    zIndexOffset: 2000
-                }).addTo(map);
-                
-                locMarker.bindPopup(`
-                    <div style="text-align: center; padding: 5px;">
-                        <strong style="color: #2196F3">
-                            <i class="fas fa-crosshairs"></i> SU UBICACIÓN
-                        </strong><br>
-                        <small>Precisión: ${Math.round(accuracy)} metros</small><br>
-                        <small>${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}</small>
-                    </div>
-                `);
-            } else {
-                locMarker.setLatLng(latlng);
-            }
-
-            // Círculo de precisión
-            if (!locCircle) {
-                locCircle = L.circle(latlng, {
-                    radius: accuracy,
-                    weight: 1,
-                    color: '#2196F3',
-                    fillColor: '#2196F3',
-                    fillOpacity: 0.15
-                }).addTo(map);
-            } else {
-                locCircle.setLatLng(latlng);
-                locCircle.setRadius(accuracy);
-            }
-
-            // Solo centrar la primera vez
-            if (!gpsCentered) {
-                map.setView(latlng, 16);
-                gpsCentered = true;
-            }
-
-            // Actualizar estado
-            updateGPSStatus(`📍 Ubicación actual (±${Math.round(accuracy)} m)`, '#4CAF50');
-            
-            // Establecer como origen si no hay uno seleccionado
-            if (!puntos.origen) {
-                setPunto('origen', latlng, "Mi Ubicación GPS");
-            }
-        }
-
-        function handleLocationError(err) {
-            console.error("Error GPS:", err);
-            let msg = "No se pudo obtener la ubicación";
-            
-            if (err.code === 1) {
-                msg = "Permiso de ubicación denegado";
-            } else if (err.code === 2) {
-                msg = "Ubicación no disponible";
-            } else if (err.code === 3) {
-                msg = "Tiempo de espera agotado";
-            }
-            
-            updateGPSStatus(`❌ ${msg}`, '#F44336');
-            mostrarToast(msg, 'error');
-        }
-
-        function locateMe() {
-            if (!navigator.geolocation) {
-                mostrarToast('Geolocalización no soportada por este navegador', 'error');
-                updateGPSStatus('⚠️ GPS no disponible', '#FF9800');
-                return;
-            }
-
-            // Si ya estamos siguiendo, solo centrar
-            if (locWatchId !== null && locMarker) {
-                map.setView(locMarker.getLatLng(), 16);
-                mostrarToast('Centrando en ubicación actual', 'info');
-                return;
-            }
-
-            updateGPSStatus('📡 Obteniendo ubicación...', '#2196F3');
-            
-            // Configuración para alta precisión
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            };
-
-            // Obtener posición una vez primero
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    handleLocationSuccess(pos);
-                    // Iniciar seguimiento continuo
-                    locWatchId = navigator.geolocation.watchPosition(
-                        handleLocationSuccess,
-                        handleLocationError,
-                        options
-                    );
-                    mostrarToast('Seguimiento GPS activado', 'success');
-                },
-                handleLocationError,
-                options
-            );
-        }
-
-        function stopGPS() {
-            if (locWatchId !== null) {
-                navigator.geolocation.clearWatch(locWatchId);
-                locWatchId = null;
-            }
-            
-            if (locMarker) {
-                map.removeLayer(locMarker);
-                locMarker = null;
-            }
-            
-            if (locCircle) {
-                map.removeLayer(locCircle);
-                locCircle = null;
-            }
-            
-            gpsCentered = false;
-            updateGPSStatus('GPS desconectado', '#9E9E9E');
-        }
-
-        function updateGPSStatus(text, color) {
-            const statusEl = document.getElementById('gps-status');
-            const textEl = document.getElementById('gps-status-text');
-            
-            if (statusEl && textEl) {
-                textEl.textContent = text;
-                statusEl.style.display = 'flex';
-                statusEl.style.background = color ? `rgba(${hexToRgb(color)}, 0.8)` : 'rgba(0, 0, 0, 0.7)';
-            }
-        }
-
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? 
-                `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` 
-                : '0, 0, 0';
-        }
-
-        // ============================================
-        // 4. CONTROLES DEL MAPA MEJORADOS
-        // ============================================
-        
-        function resetNorth() {
-            map.setBearing(0);
-            mostrarToast('Mapa reorientado al norte', 'info');
-            
-            // Animación del botón
-            const btn = document.getElementById('btn-north');
-            btn.style.transform = 'rotate(0deg)';
-            setTimeout(() => {
-                btn.style.transform = '';
-            }, 300);
-        }
-
-        function toggleLayerControls() {
-            const controls = document.getElementById('layer-controls');
-            const btn = document.getElementById('btn-layers');
-            
-            if (controls.style.display === 'flex') {
-                controls.style.display = 'none';
-                btn.classList.remove('active');
-            } else {
-                controls.style.display = 'flex';
-                btn.classList.add('active');
-            }
-        }
-
-        function toggleTraffic() {
-            const btn = document.getElementById('btn-traffic');
-            
-            if (!trafficLayer) {
-                // Crear capa de tráfico
-                trafficLayer = L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap France',
-                    maxZoom: 19,
-                    opacity: 0.7
-                });
-                
-                trafficLayer.addTo(map);
-                isTrafficVisible = true;
-                btn.classList.add('active');
-                mostrarToast('Capa de tráfico activada', 'info');
-            } else {
-                if (isTrafficVisible) {
-                    map.removeLayer(trafficLayer);
-                    isTrafficVisible = false;
-                    btn.classList.remove('active');
-                    mostrarToast('Capa de tráfico desactivada', 'info');
-                } else {
-                    trafficLayer.addTo(map);
-                    isTrafficVisible = true;
-                    btn.classList.add('active');
-                    mostrarToast('Capa de tráfico activada', 'info');
-                }
-            }
-        }
-
-        function toggleBlockMode() {
-            const btn = document.getElementById('btn-block');
-            isBlockMode = !isBlockMode;
-            
-            if (isBlockMode) {
-                btn.classList.add('active');
-                btn.innerHTML = '<i class="fas fa-unlock"></i>';
-                mostrarToast('Modo bloqueo activado. Haga clic en haciendas para bloquear/desbloquear.', 'warning');
-            } else {
-                btn.classList.remove('active');
-                btn.innerHTML = '<i class="fas fa-lock"></i>';
-                mostrarToast('Modo bloqueo desactivado', 'info');
-            }
-        }
-
-        // Configurar controles de capas
-        document.getElementById('toggle-haciendas').addEventListener('change', function(e) {
-            isHaciendasVisible = e.target.checked;
-            if (haciendasLayer) {
-                if (isHaciendasVisible) {
-                    map.addLayer(haciendasLayer);
-                } else {
-                    map.removeLayer(haciendasLayer);
-                }
-            }
-        });
-
-        document.getElementById('toggle-calles').addEventListener('change', function(e) {
-            isCallesVisible = e.target.checked;
-            if (isCallesVisible) {
-                map.addLayer(calles);
-            } else {
-                map.removeLayer(calles);
-            }
-        });
-
-        document.getElementById('toggle-satelite').addEventListener('change', function(e) {
-            if (e.target.checked) {
-                map.removeLayer(calles);
-                map.addLayer(satelite);
-            } else {
-                map.removeLayer(satelite);
-                map.addLayer(calles);
-            }
-        });
-
-        document.getElementById('toggle-topografico').addEventListener('change', function(e) {
-            if (e.target.checked) {
-                map.removeLayer(calles);
-                map.addLayer(topografico);
-            } else {
-                map.removeLayer(topografico);
-                map.addLayer(calles);
-            }
-        });
-
-        // ============================================
-        // 5. SISTEMA DE VOZ PARA INSTRUCCIONES
-        // ============================================
-        
-        function speakInstructions() {
-            if (!speechSynthesis) {
-                mostrarToast('Síntesis de voz no disponible en este navegador', 'warning');
-                return;
-            }
-
-            if (!currentRoute) {
-                mostrarToast('No hay ruta calculada para leer', 'warning');
-                return;
-            }
-
-            stopSpeaking(); // Detener cualquier voz anterior
-
-            const instructions = currentRoute.instructions;
-            let instructionText = `Iniciando navegación. Ruta de ${(currentRoute.summary.totalDistance / 1000).toFixed(1)} kilómetros. `;
-            
-            instructions.forEach((step, index) => {
-                // Limpiar texto de instrucciones
-                let cleanText = step.text
-                    .replace(/<\/?[^>]+(>|$)/g, "") // Remover HTML
-                    .replace(/Continue on/g, "Continúe por")
-                    .replace(/Turn left/g, "Gire a la izquierda")
-                    .replace(/Turn right/g, "Gire a la derecha")
-                    .replace(/sharp left/g, "gire bruscamente a la izquierda")
-                    .replace(/sharp right/g, "gire bruscamente a la derecha")
-                    .replace(/slight left/g, "gire ligeramente a la izquierda")
-                    .replace(/slight right/g, "gire ligeramente a la derecha")
-                    .replace(/Destination reached/g, "Ha llegado a su destino");
-                
-                instructionText += `Paso ${index + 1}: ${cleanText}. `;
-            });
-
-            instructionText += `Fin de las instrucciones. Ha llegado a su destino.`;
-
-            const utterance = new SpeechSynthesisUtterance(instructionText);
-            utterance.lang = 'es-ES';
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
-            utterance.volume = 1.0;
-
-            // Intentar usar voz femenina si está disponible
-            const voices = speechSynthesis.getVoices();
-            const femaleVoice = voices.find(voice => 
-                voice.lang === 'es-ES' && 
-                voice.name.toLowerCase().includes('female')
-            );
-            
-            if (femaleVoice) {
-                utterance.voice = femaleVoice;
-            }
-
-            utterance.onstart = function() {
-                mostrarToast('Reproduciendo instrucciones de voz', 'info');
-            };
-
-            utterance.onend = function() {
-                mostrarToast('Instrucciones completadas', 'success');
-                currentSpeech = null;
-            };
-
-            utterance.onerror = function(event) {
-                console.error('Error en síntesis de voz:', event);
-                mostrarToast('Error al reproducir voz', 'error');
-                currentSpeech = null;
-            };
-
-            currentSpeech = utterance;
-            speechSynthesis.speak(utterance);
-        }
-
-        function stopSpeaking() {
-            if (speechSynthesis.speaking) {
-                speechSynthesis.cancel();
-                mostrarToast('Voz detenida', 'info');
-            }
-            currentSpeech = null;
-        }
-
-        // Cargar voces disponibles
-        speechSynthesis.onvoiceschanged = function() {
-            console.log('Voces disponibles:', speechSynthesis.getVoices().length);
-        };
-
-        // ============================================
-        // 6. FUNCIONALIDADES DE INTERFAZ MEJORADAS
-        // ============================================
-        
         function mostrarToast(mensaje, tipo = 'info') {
             var toast = document.getElementById('toast');
             var toastMsg = document.getElementById('toast-message');
             var icon = toast.querySelector('i');
             
-            // Configurar icono según tipo
             switch(tipo) {
                 case 'success':
                     icon.className = 'fas fa-check-circle';
@@ -1949,55 +1078,148 @@
             toastMsg.textContent = mensaje;
             toast.style.display = 'flex';
             
-            // Ocultar automáticamente después de 3 segundos
             setTimeout(() => {
                 toast.style.display = 'none';
             }, 3000);
         }
 
-        function toggleSidebar() {
-            var sb = document.getElementById('sidebar');
-            var isMobile = window.innerWidth <= 768;
+        function updateGPSStatus(text, color) {
+            const statusEl = document.getElementById('gps-status');
+            const textEl = document.getElementById('gps-status-text');
             
-            if (isMobile) {
-                sb.classList.toggle('active');
-                document.body.style.overflow = sb.classList.contains('active') ? 'hidden' : '';
-            } else {
-                sb.classList.toggle('collapsed');
+            if (statusEl && textEl) {
+                textEl.textContent = text;
+                statusEl.style.display = 'flex';
+                statusEl.style.background = color ? color : 'rgba(0, 0, 0, 0.7)';
             }
-            
-            // Ajustar el mapa después de toggle (corrige el problema del mapa gris)
-            setTimeout(() => {
-                map.invalidateSize(true);
-                map._onResize(); // Forzar redibujado
-            }, 300);
         }
 
-        function toggleParada(mostrar) {
-            var stopSection = document.getElementById('stopover-section');
-            var addBtn = document.getElementById('btn-add-stop');
-            
-            stopSection.style.display = mostrar ? 'block' : 'none';
-            addBtn.style.display = mostrar ? 'none' : 'block';
-            
-            if (!mostrar) {
-                puntos.inter = null;
-                if(markers.inter) {
-                    map.removeLayer(markers.inter);
-                    markers.inter = null;
-                }
-                document.getElementById('input-inter').value = "";
+        // ============================================
+        // 3. SISTEMA DE BLOQUEO DE VÍAS
+        // ============================================
+
+        function toggleBlockControls() {
+            var controls = document.getElementById('block-controls');
+            controls.style.display = controls.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function startBlockingRoad() {
+            isBlockingMode = true;
+            document.getElementById('map').style.cursor = 'crosshair';
+            mostrarToast('Haz clic en el mapa para dibujar la vía bloqueada. Doble clic para terminar.', 'info');
+            toggleBlockControls();
+        }
+
+        function clearBlockedRoads() {
+            blockedRoads.forEach(road => map.removeLayer(road));
+            blockedRoads = [];
+            mostrarToast('Vías bloqueadas eliminadas', 'success');
+        }
+
+        map.on('click', function(e) {
+            if (isBlockingMode) {
+                drawingPoints.push(e.latlng);
                 
-                if (currentRoute) {
-                    recalcularRuta();
+                if (tempPolyline) {
+                    map.removeLayer(tempPolyline);
                 }
+                
+                if (drawingPoints.length > 1) {
+                    tempPolyline = L.polyline(drawingPoints, {
+                        color: '#f44336',
+                        weight: 3,
+                        dashArray: '10, 10',
+                        opacity: 0.7
+                    }).addTo(map);
+                }
+                
+                // Crear marcador temporal
+                L.circleMarker(e.latlng, {
+                    radius: 4,
+                    color: '#f44336',
+                    fillColor: '#f44336',
+                    fillOpacity: 1
+                }).addTo(map);
+            } else if (modoManual) {
+                var tipoNombre = modoManual === 'origen' ? 'Origen' : 
+                               modoManual === 'inter' ? 'Parada Intermedia' : 'Destino';
+                setPunto(modoManual, e.latlng, `${tipoNombre} Manual`);
             }
+        });
+
+        map.on('dblclick', function(e) {
+            if (isBlockingMode && drawingPoints.length > 1) {
+                // Finalizar dibujo
+                var road = L.polyline(drawingPoints, {
+                    className: 'blocked-road',
+                    color: '#f44336',
+                    weight: 4,
+                    dashArray: '10, 10',
+                    opacity: 0.8
+                }).addTo(map);
+                
+                road.bindPopup('Vía bloqueada<br><button onclick="removeBlockedRoad(this)">Eliminar</button>');
+                blockedRoads.push(road);
+                
+                // Limpiar
+                if (tempPolyline) {
+                    map.removeLayer(tempPolyline);
+                    tempPolyline = null;
+                }
+                
+                // Eliminar marcadores temporales
+                map.eachLayer(function(layer) {
+                    if (layer instanceof L.CircleMarker && layer.options.color === '#f44336') {
+                        map.removeLayer(layer);
+                    }
+                });
+                
+                drawingPoints = [];
+                isBlockingMode = false;
+                document.getElementById('map').style.cursor = '';
+                mostrarToast('Vía bloqueada añadida. La ruta evitará esta vía.', 'success');
+            }
+        });
+
+        function removeBlockedRoad(button) {
+            var popup = button.parentElement.parentElement;
+            var road = popup._source;
+            
+            map.removeLayer(road);
+            blockedRoads = blockedRoads.filter(r => r !== road);
+            mostrarToast('Vía bloqueada eliminada', 'success');
         }
 
         // ============================================
-        // 7. BÚSQUEDA INTELIGENTE MEJORADA
+        // 4. BÚSQUEDA Y SELECCIÓN DE HACIENDAS
         // ============================================
-        
+
+        function cargarHaciendas() {
+            // Datos de ejemplo (en producción cargar desde haciendas.geojson)
+            dbHaciendas = [
+                {
+                    nombre: "Hacienda Providencia",
+                    lat: 3.62,
+                    lng: -76.30,
+                    area: "120 ha"
+                },
+                {
+                    nombre: "Hacienda San José",
+                    lat: 3.60,
+                    lng: -76.28,
+                    area: "85 ha"
+                },
+                {
+                    nombre: "Hacienda Santa Ana",
+                    lat: 3.64,
+                    lng: -76.32,
+                    area: "95 ha"
+                }
+            ];
+            
+            mostrarToast('Sistema de rutas listo', 'success');
+        }
+
         function buscar(tipo) {
             var inputId = 'input-' + tipo;
             var listId = 'list-' + tipo;
@@ -2009,55 +1231,26 @@
             
             if (txt.length < 2) return;
             
-            // Filtrar haciendas no bloqueadas
-            var resultados = dbHaciendas
-                .filter(h => !blockedHaciendas.includes(getNombre(h)))
-                .map(h => {
-                    var nombre = getNombre(h);
-                    var nombreLower = nombre.toLowerCase();
-                    var score = 0;
-                    
-                    if (nombreLower.startsWith(txt)) score += 100;
-                    if (nombreLower.includes(' ' + txt + ' ')) score += 50;
-                    if (nombreLower.includes(txt)) score += 30;
-                    
-                    return { hacienda: h, nombre: nombre, score: score };
-                })
-                .filter(item => item.score > 0)
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 10)
-                .map(item => item.hacienda);
+            var resultados = dbHaciendas.filter(h => 
+                h.nombre.toLowerCase().includes(txt)
+            ).slice(0, 5);
             
             if (resultados.length > 0) {
                 resultados.forEach(h => {
                     var li = document.createElement("li");
-                    var nombre = getNombre(h);
-                    
                     li.innerHTML = `
                         <i class="fas fa-map-marker-alt"></i>
                         <div>
-                            <strong>${nombre}</strong>
-                            ${h.properties.Area ? `<br><small>Área: ${h.properties.Area} ha</small>` : ''}
-                            ${blockedHaciendas.includes(nombre) ? '<br><small style="color: #f44336;"><i class="fas fa-lock"></i> BLOQUEADA</small>' : ''}
+                            <strong>${h.nombre}</strong>
+                            <br><small>Área: ${h.area}</small>
                         </div>
                     `;
                     
                     li.onclick = function() {
-                        if (blockedHaciendas.includes(nombre)) {
-                            mostrarToast('Esta hacienda está bloqueada', 'warning');
-                            return;
-                        }
-                        
-                        try {
-                            var tempLayer = L.geoJSON(h);
-                            var centro = tempLayer.getBounds().getCenter();
-                            setPunto(tipo, centro, nombre);
-                            lista.style.display = "none";
-                            mostrarToast(`Ubicación establecida: ${nombre}`, 'success');
-                        } catch (e) {
-                            console.error(e);
-                            mostrarToast('Error al establecer ubicación', 'error');
-                        }
+                        var latlng = L.latLng(h.lat, h.lng);
+                        setPunto(tipo, latlng, h.nombre);
+                        lista.style.display = "none";
+                        mostrarToast(`Ubicación establecida: ${h.nombre}`, 'success');
                     };
                     
                     lista.appendChild(li);
@@ -2065,140 +1258,136 @@
                 
                 lista.style.display = "block";
                 
-                if (window.innerWidth <= 768) {
-                    lista.style.transform = 'translateY(0)';
+                // En móvil, ajustar posición
+                if (isMobile) {
+                    var input = document.getElementById(inputId);
+                    var rect = input.getBoundingClientRect();
+                    lista.style.position = 'fixed';
+                    lista.style.top = (rect.bottom + window.scrollY) + 'px';
+                    lista.style.left = '0';
+                    lista.style.right = '0';
+                    lista.style.zIndex = '3001';
                 }
-            } else {
-                var li = document.createElement("li");
-                li.innerHTML = '<i class="fas fa-search"></i> No se encontraron resultados';
-                li.style.color = 'var(--prov-gray-medium)';
-                li.style.cursor = 'default';
-                lista.appendChild(li);
-                lista.style.display = "block";
             }
         }
 
-        // ============================================
-        // 8. GESTIÓN DE PUNTOS EN EL MAPA
-        // ============================================
-        
         function setPunto(tipo, latlng, nombre) {
-            // Verificar si la ubicación está en hacienda bloqueada
-            if (haciendasLayer) {
-                var isBlocked = false;
-                haciendasLayer.eachLayer(function(layer) {
-                    if (layer.getBounds().contains(latlng) && 
-                        blockedHaciendas.includes(getNombre(layer.feature))) {
-                        isBlocked = true;
-                    }
-                });
-                
-                if (isBlocked) {
-                    mostrarToast('No se puede seleccionar una hacienda bloqueada', 'error');
-                    return;
-                }
-            }
-            
-            // Eliminar marcador anterior si existe
             if (markers[tipo]) {
                 map.removeLayer(markers[tipo]);
             }
             
-            // Crear nuevo marcador personalizado
             markers[tipo] = L.marker(latlng, {
-                icon: createCustomIcon(tipo),
-                zIndexOffset: 1000
-            })
-            .addTo(map)
-            .bindPopup(`
-                <div style="text-align: center; padding: 5px;">
-                    <strong style="color: ${COLORS[tipo]}">
-                        <i class="fas fa-${tipo === 'origen' ? 'play' : tipo === 'inter' ? 'pause' : 'flag'}"></i>
-                        ${tipo.toUpperCase()}
-                    </strong><br>
-                    ${nombre}<br>
-                    <small>${latlng.lat.toFixed(5)}, ${latlng.lng.toFixed(5)}</small>
-                </div>
-            `)
-            .openPopup();
+                icon: L.divIcon({
+                    className: 'custom-marker marker-' + tipo,
+                    html: `<i class="fas fa-${tipo === 'origen' ? 'play' : tipo === 'inter' ? 'pause' : 'flag'}"></i>`,
+                    iconSize: [30, 30]
+                })
+            }).addTo(map).bindPopup(`<b>${tipo.toUpperCase()}</b><br>${nombre}`).openPopup();
             
-            // Guardar punto
             puntos[tipo] = latlng;
             document.getElementById('input-' + tipo).value = nombre;
             
-            // Actualizar estado de la aplicación
-            actualizarEstadoApp();
+            // Cerrar búsqueda
+            document.getElementById('list-' + tipo).style.display = 'none';
             
-            // Centrar mapa en el nuevo punto
-            map.setView(latlng, 14);
-            
-            // Salir del modo manual si está activo
-            if (modoManual === tipo) {
-                document.getElementById('map').style.cursor = '';
-                modoManual = null;
-                mostrarToast('Ubicación seleccionada en el mapa', 'success');
-            }
-            
-            // Cerrar sidebar en móvil
-            if (window.innerWidth <= 768) {
+            // Cerrar sidebar en móvil si no es búsqueda
+            if (isMobile && window.getSelection().toString() === '') {
                 toggleSidebar();
             }
             
-            // Si ya hay una ruta, recalcular
-            if (currentRoute && (tipo === 'origen' || tipo === 'dest' || tipo === 'inter')) {
-                setTimeout(recalcularRuta, 500);
-            }
+            // Actualizar estado
+            actualizarEstadoApp();
         }
 
         function activarManual(tipo) {
             modoManual = tipo;
             document.getElementById('map').style.cursor = 'crosshair';
-            mostrarToast(`Haga clic en el mapa para seleccionar ${tipo === 'origen' ? 'origen' : tipo === 'dest' ? 'destino' : 'parada'}`, 'info');
+            mostrarToast(`Haz clic en el mapa para seleccionar ${tipo === 'origen' ? 'origen' : tipo === 'dest' ? 'destino' : 'parada'}`, 'info');
             
-            if (window.innerWidth <= 768) {
+            if (isMobile) {
                 toggleSidebar();
             }
         }
 
-        map.on('click', function(e) {
-            if (modoManual) {
-                var tipoNombre = modoManual === 'origen' ? 'Origen' : 
-                               modoManual === 'inter' ? 'Parada Intermedia' : 'Destino';
-                setPunto(modoManual, e.latlng, `${tipoNombre} Manual`);
+        // ============================================
+        // 5. SISTEMA DE GPS
+        // ============================================
+
+        function locateMe() {
+            if (!navigator.geolocation) {
+                mostrarToast('Geolocalización no soportada', 'error');
+                return;
             }
-        });
+
+            updateGPSStatus('Obteniendo ubicación...', '#2196F3');
+            
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    var latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                    
+                    if (!locMarker) {
+                        locMarker = L.marker(latlng, {
+                            icon: L.divIcon({
+                                className: 'gps-marker',
+                                html: '<div style="background: #2196F3; border-radius: 50%; width: 20px; height: 20px; border: 3px solid white; box-shadow: 0 0 10px rgba(33, 150, 243, 0.5);"></div>',
+                                iconSize: [20, 20]
+                            })
+                        }).addTo(map);
+                        
+                        locMarker.bindPopup('<b>Tu ubicación</b>').openPopup();
+                    } else {
+                        locMarker.setLatLng(latlng);
+                    }
+                    
+                    if (!locCircle) {
+                        locCircle = L.circle(latlng, {
+                            radius: pos.coords.accuracy,
+                            color: '#2196F3',
+                            fillColor: '#2196F3',
+                            fillOpacity: 0.15
+                        }).addTo(map);
+                    } else {
+                        locCircle.setLatLng(latlng);
+                        locCircle.setRadius(pos.coords.accuracy);
+                    }
+                    
+                    map.setView(latlng, 16);
+                    updateGPSStatus(`Ubicación obtenida (±${Math.round(pos.coords.accuracy)}m)`, '#4CAF50');
+                    
+                    // Establecer como origen si no hay uno
+                    if (!puntos.origen) {
+                        setPunto('origen', latlng, "Mi Ubicación GPS");
+                    }
+                },
+                function(err) {
+                    updateGPSStatus('Error obteniendo ubicación', '#F44336');
+                    mostrarToast('Error: ' + err.message, 'error');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
 
         // ============================================
-        // 9. CÁLCULO Y VISUALIZACIÓN DE RUTAS
+        // 6. CÁLCULO DE RUTAS CON EVITACIÓN DE VÍAS BLOQUEADAS
         // ============================================
-        
+
         function calcularRuta() {
-            // Validaciones
-            if (!puntos.origen) {
-                mostrarToast('Seleccione un punto de origen', 'warning');
-                document.getElementById('input-origen').focus();
+            if (!puntos.origen || !puntos.dest) {
+                mostrarToast('Seleccione origen y destino', 'warning');
                 return;
             }
-            
-            if (!puntos.dest) {
-                mostrarToast('Seleccione un punto de destino', 'warning');
-                document.getElementById('input-dest').focus();
-                return;
-            }
-            
+
             // Limpiar ruta anterior
             if (controlRuta) {
                 map.removeControl(controlRuta);
                 controlRuta = null;
             }
-            
-            if (highlightLayer) {
-                map.removeLayer(highlightLayer);
-                highlightLayer = null;
-            }
-            
+
             // Mostrar loading
-            var routeBtn = document.querySelector('.btn-primary');
             var routeLoading = document.getElementById('route-loading');
             var routeIcon = document.getElementById('route-icon');
             var routeText = document.getElementById('route-text');
@@ -2206,22 +1395,13 @@
             routeLoading.style.display = 'inline-block';
             routeIcon.style.display = 'none';
             routeText.textContent = 'CALCULANDO...';
-            routeBtn.disabled = true;
-            
+
             // Preparar waypoints
             var waypoints = [puntos.origen];
             if (puntos.inter) waypoints.push(puntos.inter);
             waypoints.push(puntos.dest);
-            
-            // Ocultar panel de instrucciones
-            toggleInstrucciones(false);
-            
-            // Cerrar sidebar en móvil
-            if (window.innerWidth <= 768) {
-                toggleSidebar();
-            }
-            
-            // Configurar y calcular ruta
+
+            // Calcular ruta
             controlRuta = L.Routing.control({
                 waypoints: waypoints,
                 language: 'es',
@@ -2232,208 +1412,148 @@
                 formatter: new L.Routing.Formatter({ language: 'es' }),
                 showAlternatives: true,
                 lineOptions: {
-                    styles: [{color: COLORS.route, opacity: 0.9, weight: 8}],
-                    addWaypoints: false,
-                    extendToWaypoints: true,
-                    missingRouteTolerance: 10
+                    styles: [{color: '#d32f2f', opacity: 0.9, weight: 6}]
                 },
-                altLineOptions: {
-                    styles: [
-                        {color: COLORS.altRoute, opacity: 0.7, weight: 6, dashArray: '15, 10'},
-                        {color: '#f39c12', opacity: 0.7, weight: 6, dashArray: '20, 15'}
-                    ]
-                },
-                createMarker: () => null,
+                createMarker: function() { return null; },
                 routeWhileDragging: false,
                 show: false
             }).addTo(map);
-            
-            // Eventos de ruta
+
             controlRuta.on('routesfound', function(e) {
                 rutasEncontradas = e.routes;
                 rutaIndex = 0;
                 currentRoute = rutasEncontradas[0];
                 
-                // Mostrar datos de la ruta principal
+                // Verificar si la ruta pasa por vías bloqueadas
+                var passesThroughBlocked = checkRouteThroughBlocked(currentRoute);
+                
+                if (passesThroughBlocked && rutasEncontradas.length > 1) {
+                    // Buscar ruta alternativa que no pase por vías bloqueadas
+                    var alternativeRoute = findAlternativeRoute();
+                    if (alternativeRoute) {
+                        currentRoute = alternativeRoute;
+                        rutaIndex = rutasEncontradas.indexOf(alternativeRoute);
+                        mostrarToast('Ruta calculada evitando vías bloqueadas', 'success');
+                    } else {
+                        mostrarToast('Ruta pasa por vías bloqueadas. Considere desbloquear vías.', 'warning');
+                    }
+                }
+                
                 mostrarDatosRuta(currentRoute);
                 
-                // Ajustar vista del mapa a la ruta
+                // Ajustar vista
                 if (rutasEncontradas.length > 0) {
                     var bounds = L.latLngBounds(rutasEncontradas[0].coordinates);
-                    map.fitBounds(bounds, { 
-                        padding: [100, 100],
-                        maxZoom: 16
-                    });
+                    map.fitBounds(bounds, { padding: [50, 50] });
                 }
                 
                 // Actualizar UI
                 routeLoading.style.display = 'none';
                 routeIcon.style.display = 'inline-block';
                 routeText.textContent = 'RUTA CALCULADA';
-                routeBtn.disabled = false;
                 
-                // Mostrar botones de alternativas
+                // Mostrar botón de alternativas
                 var btnAlt = document.getElementById('btn-alt');
-                var btnInstr = document.getElementById('btn-instr');
-                
-                btnInstr.style.display = 'block';
-                
                 if (rutasEncontradas.length > 1) {
                     btnAlt.style.display = 'block';
-                    btnAlt.innerHTML = `<i class="fas fa-exchange-alt"></i> Cambiar Ruta (${rutasEncontradas.length} opciones)`;
-                    btnAlt.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
-                } else {
-                    btnAlt.style.display = 'block';
-                    btnAlt.innerHTML = `<i class="fas fa-info-circle"></i> Ruta Única Disponible`;
-                    btnAlt.style.background = 'linear-gradient(135deg, #95a5a6, #7f8c8d)';
-                    btnAlt.onclick = null;
+                    btnAlt.innerHTML = `<i class="fas fa-exchange-alt"></i> Ver Alternativa (${rutasEncontradas.length})`;
                 }
                 
-                mostrarToast(`Ruta calculada: ${rutasEncontradas.length} opciones encontradas`, 'success');
-                
-                // Abrir automáticamente instrucciones en escritorio
-                if (window.innerWidth > 768) {
-                    toggleInstrucciones(true);
+                // Mostrar instrucciones en móvil
+                if (isMobile) {
+                    showMobileInstructions();
                 }
+                
+                mostrarToast('Ruta calculada exitosamente', 'success');
             });
-            
+
             controlRuta.on('routingerror', function(e) {
                 routeLoading.style.display = 'none';
                 routeIcon.style.display = 'inline-block';
                 routeText.textContent = 'CALCULAR RUTA';
-                routeBtn.disabled = false;
-                
-                mostrarToast('No se pudo calcular la ruta. Verifique las ubicaciones', 'error');
-                document.getElementById('route-info').style.display = 'none';
+                mostrarToast('Error calculando ruta', 'error');
             });
         }
 
-        function recalcularRuta() {
-            if (puntos.origen && puntos.dest) {
-                calcularRuta();
+        function checkRouteThroughBlocked(route) {
+            if (blockedRoads.length === 0) return false;
+            
+            var routeLine = L.polyline(route.coordinates);
+            
+            for (var i = 0; i < blockedRoads.length; i++) {
+                var blockedLine = blockedRoads[i];
+                // Verificar si las líneas se intersectan (simplificado)
+                if (linesIntersect(routeLine, blockedLine)) {
+                    return true;
+                }
             }
+            return false;
+        }
+
+        function linesIntersect(line1, line2) {
+            // Simplificación: verificar si algún punto está cerca
+            var points1 = line1.getLatLngs();
+            var points2 = line2.getLatLngs();
+            
+            for (var i = 0; i < points1.length; i++) {
+                for (var j = 0; j < points2.length; j++) {
+                    if (points1[i].distanceTo(points2[j]) < 50) { // 50 metros
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function findAlternativeRoute() {
+            for (var i = 1; i < rutasEncontradas.length; i++) {
+                if (!checkRouteThroughBlocked(rutasEncontradas[i])) {
+                    return rutasEncontradas[i];
+                }
+            }
+            return null;
         }
 
         function cambiarRutaAlternativa() {
             if (!rutasEncontradas || rutasEncontradas.length < 2) return;
             
             rutaIndex = (rutaIndex + 1) % rutasEncontradas.length;
-            var rutaSeleccionada = rutasEncontradas[rutaIndex];
+            currentRoute = rutasEncontradas[rutaIndex];
             
-            // Mostrar datos de la nueva ruta
-            mostrarDatosRuta(rutaSeleccionada);
-            
-            // Resaltar ruta alternativa si no es la principal
-            if (highlightLayer) map.removeLayer(highlightLayer);
-            
-            if (rutaIndex !== 0) {
-                highlightLayer = L.polyline(rutaSeleccionada.coordinates, {
-                    color: '#2ecc71',
-                    weight: 10,
-                    opacity: 0.9,
-                    dashArray: '20, 15'
-                }).addTo(map);
-            }
-            
-            // Ajustar vista del mapa a la ruta seleccionada
-            var bounds = L.latLngBounds(rutaSeleccionada.coordinates);
-            map.fitBounds(bounds, { 
-                padding: [100, 100],
-                maxZoom: 16
-            });
-            
-            // Actualizar texto del botón
-            var btnAlt = document.getElementById('btn-alt');
-            var color = '#2ecc71';
-            
-            if (rutaIndex === 0) {
-                btnAlt.innerHTML = `<i class="fas fa-route"></i> Viendo Ruta Principal`;
-                color = '#f39c12';
-            } else if (rutasEncontradas.length === 2 && rutaIndex === 1) {
-                btnAlt.innerHTML = `<i class="fas fa-exchange-alt"></i> Volver a Ruta Principal`;
-                color = '#e74c3c';
-            } else {
-                btnAlt.innerHTML = `<i class="fas fa-route"></i> Opción ${rutaIndex + 1} de ${rutasEncontradas.length}`;
-            }
-            
-            btnAlt.style.background = `linear-gradient(135deg, ${color}, ${color}99)`;
-            
-            mostrarToast(`Cambiada a ruta alternativa ${rutaIndex + 1}`, 'info');
+            mostrarDatosRuta(currentRoute);
+            mostrarToast(`Cambiado a ruta alternativa ${rutaIndex + 1}/${rutasEncontradas.length}`, 'info');
         }
 
         // ============================================
-        // 10. VISUALIZACIÓN DE DATOS E INSTRUCCIONES
+        // 7. INSTRUCCIONES Y VOZ
         // ============================================
-        
+
         function mostrarDatosRuta(ruta) {
             var km = (ruta.summary.totalDistance / 1000).toFixed(1);
             var min = Math.round(ruta.summary.totalTime / 60);
             
-            // Actualizar información en sidebar
-            var routeInfo = document.getElementById('route-info');
-            var routeDetails = document.getElementById('route-details');
-            
-            routeInfo.style.display = 'block';
-            routeDetails.innerHTML = `
-                <div style="text-align: center; padding: 15px;">
-                    <div style="font-size: 2rem; font-weight: bold; color: ${COLORS.route}; margin-bottom: 5px;">
+            // Actualizar sidebar
+            document.getElementById('route-info').style.display = 'block';
+            document.getElementById('route-details').innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; color: #d32f2f; margin-bottom: 5px;">
                         ${km} <small style="font-size: 1rem;">km</small>
                     </div>
-                    <div style="font-size: 1.2rem; color: var(--prov-gray-medium); margin-bottom: 15px;">
-                        <i class="fas fa-clock"></i> ${min} minutos estimados
-                    </div>
-                    <div style="background: #f5f5f5; padding: 10px; border-radius: var(--border-radius); font-size: 0.9rem;">
-                        <div style="margin-bottom: 8px;">
-                            <i class="fas fa-play" style="color: ${COLORS.origin};"></i>
-                            <strong>Origen:</strong> ${document.getElementById('input-origen').value}
-                        </div>
-                        ${puntos.inter ? `
-                        <div style="margin-bottom: 8px;">
-                            <i class="fas fa-pause" style="color: ${COLORS.inter};"></i>
-                            <strong>Parada:</strong> ${document.getElementById('input-inter').value}
-                        </div>` : ''}
-                        <div>
-                            <i class="fas fa-flag" style="color: ${COLORS.dest};"></i>
-                            <strong>Destino:</strong> ${document.getElementById('input-dest').value}
-                        </div>
+                    <div style="color: var(--prov-gray-medium); margin-bottom: 15px;">
+                        <i class="fas fa-clock"></i> ${min} minutos
                     </div>
                 </div>
             `;
             
-            // Actualizar panel de instrucciones flotante
-            var summaryPanel = document.getElementById('route-summary');
-            var contentPanel = document.getElementById('directions-content');
+            // Actualizar instrucciones móviles
+            var mobileContent = document.getElementById('mobile-directions-content');
+            mobileContent.innerHTML = '';
             
-            summaryPanel.innerHTML = `
-                <h3><i class="fas fa-info-circle"></i> Resumen de Ruta</h3>
-                <div class="route-stats">
-                    <div class="stat-item">
-                        <span class="stat-value">${km}</span>
-                        <span class="stat-label">Distancia</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">${min}</span>
-                        <span class="stat-label">Tiempo</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-value">${ruta.instructions.length}</span>
-                        <span class="stat-label">Pasos</span>
-                    </div>
-                </div>
-            `;
-            
-            contentPanel.innerHTML = "";
-            
-            // Agregar instrucciones paso a paso
             ruta.instructions.forEach((step, index) => {
-                var iconClass = getIconoInstruccion(step.type, step.modifier);
                 var dist = step.distance > 1000 ? 
                     (step.distance/1000).toFixed(1) + ' km' : 
                     Math.round(step.distance) + ' m';
                 
-                if(step.distance === 0) dist = "";
-                
-                // Limpiar texto para español
                 var cleanText = step.text
                     .replace(/Continue on/g, "Continúe por")
                     .replace(/Turn left/g, "Gire a la izquierda")
@@ -2445,285 +1565,235 @@
                     .replace(/Destination reached/g, "Ha llegado a su destino");
                 
                 var div = document.createElement('div');
-                div.className = 'instruction-step';
+                div.className = 'mobile-instruction-step';
                 div.innerHTML = `
-                    <div class="step-icon">
-                        <i class="${iconClass}"></i>
+                    <div class="mobile-step-icon">
+                        <i class="fas fa-${getStepIcon(step.type)}"></i>
                     </div>
-                    <div class="step-content">
-                        <div class="step-text">${cleanText}</div>
+                    <div class="mobile-step-content">
+                        <div class="mobile-step-text">${cleanText}</div>
                     </div>
-                    <div class="step-dist">${dist}</div>
+                    <div class="mobile-step-dist">${dist}</div>
                 `;
-                
-                contentPanel.appendChild(div);
+                mobileContent.appendChild(div);
             });
-            
-            // Calcular y mostrar progreso
-            actualizarProgresoRuta(ruta);
         }
 
-        function getIconoInstruccion(type, mod) {
+        function getStepIcon(type) {
             switch(type) {
-                case 'Head':
-                    return 'fas fa-road';
-                case 'Continue':
-                    return 'fas fa-long-arrow-alt-right';
-                case 'TurnLeft':
-                    return 'fas fa-arrow-left';
-                case 'TurnRight':
-                    return 'fas fa-arrow-right';
-                case 'SharpLeft':
-                    return 'fas fa-arrow-circle-left';
-                case 'SharpRight':
-                    return 'fas fa-arrow-circle-right';
-                case 'SlightLeft':
-                    return 'fas fa-arrow-left rotate-45';
-                case 'SlightRight':
-                    return 'fas fa-arrow-right rotate-45';
-                case 'Roundabout':
-                    return 'fas fa-sync';
-                case 'DestinationReached':
-                    return 'fas fa-flag-checkered';
-                case 'WaypointReached':
-                    return 'fas fa-map-pin';
-                default:
-                    if (mod && mod.includes('Left')) return 'fas fa-arrow-left';
-                    if (mod && mod.includes('Right')) return 'fas fa-arrow-right';
-                    return 'fas fa-arrow-up';
+                case 'Head': case 'Continue': return 'arrow-right';
+                case 'TurnLeft': return 'arrow-left';
+                case 'TurnRight': return 'arrow-right';
+                case 'SharpLeft': return 'undo';
+                case 'SharpRight': return 'redo';
+                case 'SlightLeft': return 'arrow-left';
+                case 'SlightRight': return 'arrow-right';
+                default: return 'map-signs';
             }
         }
 
-        function actualizarProgresoRuta(ruta) {
-            var totalDist = ruta.summary.totalDistance;
-            var acumulado = 0;
-            
-            // Limpiar intervalo anterior si existe
-            if (window.progressInterval) {
-                clearInterval(window.progressInterval);
+        function speakInstructions() {
+            if (!speechSynthesis) {
+                mostrarToast('Voz no disponible en este dispositivo', 'warning');
+                return;
             }
+
+            if (!currentRoute) {
+                mostrarToast('No hay ruta para leer', 'warning');
+                return;
+            }
+
+            stopSpeaking();
+
+            var instructionText = `Iniciando navegación. Ruta de ${(currentRoute.summary.totalDistance / 1000).toFixed(1)} kilómetros. `;
             
-            // Simular progreso de recorrido
-            window.progressInterval = setInterval(() => {
-                acumulado += totalDist / 100;
-                if (acumulado > totalDist) {
-                    acumulado = totalDist;
-                    clearInterval(window.progressInterval);
-                }
+            currentRoute.instructions.forEach((step, index) => {
+                var cleanText = step.text
+                    .replace(/<\/?[^>]+(>|$)/g, "")
+                    .replace(/Continue on/g, "Continúe por")
+                    .replace(/Turn left/g, "Gire a la izquierda")
+                    .replace(/Turn right/g, "Gire a la derecha")
+                    .replace(/sharp left/g, "gire bruscamente a la izquierda")
+                    .replace(/sharp right/g, "gire bruscamente a la derecha")
+                    .replace(/slight left/g, "gire ligeramente a la izquierda")
+                    .replace(/slight right/g, "gire ligeramente a la derecha")
+                    .replace(/Destination reached/g, "Ha llegado a su destino");
                 
-                var percent = Math.min(100, (acumulado / totalDist * 100));
-                document.getElementById('progress-fill').style.width = percent + '%';
-                document.getElementById('progress-percent').textContent = Math.round(percent) + '%';
-            }, 50);
+                instructionText += `Paso ${index + 1}: ${cleanText}. `;
+            });
+
+            instructionText += "Fin de las instrucciones.";
+
+            var utterance = new SpeechSynthesisUtterance(instructionText);
+            utterance.lang = 'es-ES';
+            utterance.rate = 1.0;
+            utterance.volume = 1.0;
+
+            // Buscar voz femenina
+            var voices = speechSynthesis.getVoices();
+            var femaleVoice = voices.find(v => v.lang === 'es-ES' && v.name.includes('Female'));
+            if (femaleVoice) utterance.voice = femaleVoice;
+
+            utterance.onstart = function() {
+                mostrarToast('Reproduciendo instrucciones', 'info');
+            };
+
+            utterance.onend = function() {
+                mostrarToast('Instrucciones completadas', 'success');
+            };
+
+            speechSynthesis.speak(utterance);
         }
 
-        function toggleInstrucciones(mostrar) {
-            var panel = document.getElementById('floating-directions');
-            var btnInstr = document.getElementById('btn-instr');
-            
-            if (mostrar === true) {
-                panel.style.display = 'flex';
-                btnInstr.innerHTML = '<i class="fas fa-times"></i> Cerrar Instrucciones';
-                btnInstr.onclick = function() { toggleInstrucciones(false); };
-            } else if (mostrar === false) {
-                panel.style.display = 'none';
-                btnInstr.innerHTML = '<i class="fas fa-directions"></i> Ver Instrucciones Detalladas';
-                btnInstr.onclick = function() { toggleInstrucciones(true); };
-            } else {
-                if (panel.style.display === 'flex') {
-                    toggleInstrucciones(false);
-                } else {
-                    toggleInstrucciones(true);
-                }
+        function stopSpeaking() {
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
             }
         }
 
         // ============================================
-        // 11. FUNCIONALIDADES ADICIONALES
+        // 8. INTERFAZ Y CONTROLES
         // ============================================
-        
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+            
+            // Ajustar mapa después de la animación
+            setTimeout(function() {
+                map.invalidateSize();
+            }, 300);
+            
+            // Si se cierra el sidebar, ocultar instrucciones móviles
+            if (!sidebar.classList.contains('active') && isMobile) {
+                sidebar.classList.remove('show-directions');
+            }
+        }
+
+        function toggleParada(mostrar) {
+            document.getElementById('stopover-section').style.display = mostrar ? 'block' : 'none';
+            document.getElementById('btn-add-stop').style.display = mostrar ? 'none' : 'block';
+            
+            if (!mostrar) {
+                puntos.inter = null;
+                if (markers.inter) {
+                    map.removeLayer(markers.inter);
+                    markers.inter = null;
+                }
+                document.getElementById('input-inter').value = '';
+            }
+        }
+
+        function showMobileInstructions() {
+            var sidebar = document.getElementById('sidebar');
+            sidebar.classList.add('show-directions');
+            if (!sidebar.classList.contains('active')) {
+                sidebar.classList.add('active');
+            }
+            map.invalidateSize();
+        }
+
+        function hideMobileInstructions() {
+            var sidebar = document.getElementById('sidebar');
+            sidebar.classList.remove('show-directions');
+            map.invalidateSize();
+        }
+
         function actualizarEstadoApp() {
             var state = document.getElementById('app-state');
-            var icon = state.querySelector('i');
-            var text = state.querySelector('span');
-            
             var puntosCompletados = Object.values(puntos).filter(p => p !== null).length;
-            var totalPuntos = 3;
             
-            if (puntosCompletados === totalPuntos && currentRoute) {
-                icon.style.color = '#4CAF50';
-                text.textContent = 'Ruta calculada';
-            } else if (puntosCompletados >= 2) {
-                icon.style.color = '#FFC107';
-                text.textContent = 'Listo para calcular ruta';
+            if (puntosCompletados >= 2) {
+                state.innerHTML = '<i class="fas fa-circle" style="color: #4CAF50;"></i> <span>Listo para calcular ruta</span>';
             } else {
-                icon.style.color = '#F44336';
-                text.textContent = 'Seleccione ubicaciones';
+                state.innerHTML = '<i class="fas fa-circle" style="color: #FFC107;"></i> <span>Seleccione ubicaciones</span>';
             }
         }
 
         function limpiarTodo() {
-            if (Object.values(puntos).some(p => p !== null) && 
-                !confirm('¿Está seguro de que desea borrar toda la información actual?')) {
-                return;
-            }
-            
-            // Resetear puntos
+            // Limpiar puntos
             puntos = { origen: null, inter: null, dest: null };
             
-            // Eliminar marcadores
+            // Limpiar marcadores
             Object.values(markers).forEach(marker => {
                 if (marker) map.removeLayer(marker);
             });
             markers = { origen: null, inter: null, dest: null };
             
-            // Eliminar rutas
+            // Limpiar ruta
             if (controlRuta) {
                 map.removeControl(controlRuta);
                 controlRuta = null;
             }
             
-            if (highlightLayer) {
-                map.removeLayer(highlightLayer);
-                highlightLayer = null;
-            }
+            // Limpiar inputs
+            document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
             
-            // Detener GPS
-            stopGPS();
+            // Limpiar UI
+            document.getElementById('route-info').style.display = 'none';
+            document.getElementById('btn-alt').style.display = 'none';
+            document.getElementById('stopover-section').style.display = 'none';
+            document.getElementById('btn-add-stop').style.display = 'block';
+            
+            // Ocultar instrucciones móviles
+            if (isMobile) {
+                hideMobileInstructions();
+            }
             
             // Detener voz
             stopSpeaking();
             
-            // Resetear UI
-            document.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
-            document.getElementById('route-info').style.display = 'none';
-            document.getElementById('btn-alt').style.display = 'none';
-            document.getElementById('btn-instr').style.display = 'none';
-            document.getElementById('stopover-section').style.display = 'none';
-            document.getElementById('btn-add-stop').style.display = 'block';
-            
-            // Ocultar controles
-            document.getElementById('layer-controls').style.display = 'none';
-            document.getElementById('btn-layers').classList.remove('active');
-            document.getElementById('btn-block').classList.remove('active');
-            isBlockMode = false;
-            
-            // Ocultar panel de instrucciones
-            toggleInstrucciones(false);
-            
-            // Resetear variables
-            rutasEncontradas = [];
-            rutaIndex = 0;
-            currentRoute = null;
-            modoManual = null;
-            
-            // Actualizar estado
+            mostrarToast('Sistema reiniciado', 'success');
             actualizarEstadoApp();
-            
-            // Mostrar notificación
-            mostrarToast('Sistema reiniciado. Listo para nueva consulta.', 'success');
         }
 
         // ============================================
-        // 12. INICIALIZACIÓN Y EVENTOS
+        // 9. INICIALIZACIÓN
         // ============================================
-        
-        // Cargar datos al iniciar
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Configurar mapa
+            L.control.layers({
+                "Mapa": calles,
+                "Satélite": satelite
+            }).addTo(map);
+            
+            // Botón norte
+            document.getElementById('btn-north').addEventListener('click', function() {
+                map.setView(map.getCenter(), map.getZoom());
+                mostrarToast('Mapa reorientado', 'info');
+            });
+            
+            // Cargar datos
             cargarHaciendas();
-            actualizarEstadoApp();
             
-            // Configurar arrastre del panel flotante
-            configurarArrastre();
-            
-            // Ajustar tamaño del mapa cuando cambia el tamaño de ventana
+            // Manejar redimensionamiento
             window.addEventListener('resize', function() {
-                setTimeout(() => {
-                    map.invalidateSize(true);
-                    map._onResize(); // Forzar redibujado
-                }, 100);
-                actualizarEstadoApp();
+                isMobile = window.innerWidth <= 768;
+                map.invalidateSize();
             });
             
-            // Cerrar controles de capas al hacer clic fuera
+            // Cerrar búsqueda al hacer clic fuera
             document.addEventListener('click', function(e) {
-                const layerControls = document.getElementById('layer-controls');
-                const btnLayers = document.getElementById('btn-layers');
-                
-                if (layerControls.style.display === 'flex' && 
-                    !layerControls.contains(e.target) && 
-                    !btnLayers.contains(e.target)) {
-                    layerControls.style.display = 'none';
-                    btnLayers.classList.remove('active');
+                if (!e.target.closest('.input-wrapper') && !e.target.closest('.search-results')) {
+                    document.querySelectorAll('.search-results').forEach(list => {
+                        list.style.display = 'none';
+                    });
                 }
             });
             
-            // Forzar redibujado del mapa periódicamente para evitar áreas grises
-            setInterval(() => {
-                if (map) {
-                    map.invalidateSize();
-                }
-            }, 10000); // Cada 10 segundos
-        });
-
-        function configurarArrastre() {
-            var dragItem = document.getElementById('floating-directions');
-            var dragHandle = document.getElementById('drag-handle');
-            var active = false;
-            var currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
-
-            dragHandle.addEventListener("touchstart", dragStart, false);
-            dragHandle.addEventListener("touchend", dragEnd, false);
-            dragHandle.addEventListener("touchmove", drag, false);
-            dragHandle.addEventListener("mousedown", dragStart, false);
-            document.addEventListener("mouseup", dragEnd, false);
-            document.addEventListener("mousemove", drag, false);
-
-            function dragStart(e) {
-                if (e.target.id === 'close-float-btn') return;
-                
-                if (e.type === "touchstart") {
-                    initialX = e.touches[0].clientX - xOffset;
-                    initialY = e.touches[0].clientY - yOffset;
-                } else {
-                    initialX = e.clientX - xOffset;
-                    initialY = e.clientY - yOffset;
-                }
-                
-                if (e.target === dragHandle || dragHandle.contains(e.target)) {
-                    active = true;
-                }
-            }
-
-            function dragEnd() {
-                initialX = currentX;
-                initialY = currentY;
-                active = false;
-            }
-
-            function drag(e) {
-                if (active) {
+            // Prevenir zoom con doble toque en móvil
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) {
                     e.preventDefault();
-                    
-                    if (e.type === "touchmove") {
-                        currentX = e.touches[0].clientX - initialX;
-                        currentY = e.touches[0].clientY - initialY;
-                    } else {
-                        currentX = e.clientX - initialX;
-                        currentY = e.clientY - initialY;
-                    }
-                    
-                    xOffset = currentX;
-                    yOffset = currentY;
-                    
-                    setTranslate(currentX, currentY, dragItem);
                 }
-            }
-
-            function setTranslate(xPos, yPos, el) {
-                el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
-            }
-        }
+            }, { passive: false });
+            
+            // Evitar menú contextual en móvil
+            document.addEventListener('contextmenu', function(e) {
+                if (isMobile) e.preventDefault();
+            });
+        });
     </script>
 </body>
 </html>
