@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <title>Caminos Calidad Providencia - Sistema de Optimización de Rutas Rurales</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="Sistema SIG de planificación de rutas optimizadas para transporte agrícola del Ingenio Providencia">
+    <meta name="description" content="Sistema de ruteo para Labores Agrícolas del Ingenio Providencia">
+    
+    <!-- Favicon para GitHub Pages y dispositivos móviles -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚜</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚜</text></svg>">
     
     <!-- Leaflet CSS & JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -46,6 +50,112 @@
             --mobile-sidebar-height: 85vh;
             --border-radius: 12px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- PANTALLA DE BIENVENIDA (SPLASH SCREEN) --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--prov-green-dark), var(--prov-green-main));
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.8s ease;
+        }
+
+        #splash-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .splash-content {
+            text-align: center;
+            padding: 30px;
+            max-width: 600px;
+            animation: fadeIn 1s ease;
+        }
+
+        .splash-logo {
+            font-size: 6rem;
+            margin-bottom: 30px;
+            animation: bounce 2s infinite;
+        }
+
+        .splash-logo i {
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+        }
+
+        .splash-content h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .splash-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .splash-message {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 50px;
+            opacity: 0.8;
+            max-width: 500px;
+        }
+
+        .splash-loading {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .loading-text {
+            font-size: 1rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+            animation: pulse 1.5s infinite;
+        }
+
+        .loading-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .loading-progress {
+            height: 100%;
+            width: 0%;
+            background: white;
+            border-radius: 3px;
+            animation: loading 5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes loading {
+            from { width: 0%; }
+            to { width: 100%; }
         }
 
         /* --- RESET Y ESTILO GENERAL --- */
@@ -321,7 +431,7 @@
             align-items: center;
             gap: 10px;
             transition: var(--transition);
-            -webkit-tap-highlight-color: transparent; /* Elimina el azul en tap móvil */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .search-results li:hover {
@@ -653,7 +763,7 @@
             font-weight: 500;
         }
 
-        /* --- CONTROLES PERSONALIZADOS DEL MAPA --- */
+        /* --- CONTROLES PERSONALIZADOS DEL MAPA (REUBICADOS A IZQUIERDA) --- */
         .custom-controls-container {
             position: absolute;
             top: 15px;
@@ -692,6 +802,42 @@
             color: white;
             transform: scale(1.05);
         }
+
+        /* --- BOTÓN DE ORIENTACIÓN/MOVIMIENTO (REUBICADO A IZQUIERDA) --- */
+        #btn-orientation {
+            background: white;
+            border: none;
+            border-radius: var(--border-radius);
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-medium);
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--prov-gray-dark);
+            font-size: 1.2rem;
+            position: absolute;
+            top: 15px;
+            left: 70px;
+            z-index: 1000;
+        }
+
+        #btn-orientation:hover {
+            background: var(--prov-green-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-heavy);
+            color: var(--prov-green-dark);
+        }
+
+        #btn-orientation.active {
+            background: var(--prov-blue-alt);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* --- ELIMINADO orientation-controls (se reubicó a izquierda) --- */
 
         .layer-controls {
             position: absolute;
@@ -957,6 +1103,29 @@
                 overflow: hidden;
             }
 
+            #splash-screen {
+                padding: 20px;
+            }
+
+            .splash-logo {
+                font-size: 4rem;
+                margin-bottom: 20px;
+            }
+
+            .splash-content h1 {
+                font-size: 2rem;
+            }
+
+            .splash-subtitle {
+                font-size: 1.2rem;
+                margin-bottom: 30px;
+            }
+
+            .splash-message {
+                font-size: 1rem;
+                margin-bottom: 30px;
+            }
+
             #sidebar-toggle {
                 display: flex;
                 bottom: 25px;
@@ -1016,18 +1185,26 @@
                 min-height: 56px;
             }
 
-            /* Responsive mobile - sin fixed o transform para evitar problemas en móvil */
-            .search-results {
-                position: absolute; /* Mantiene absolute relativo al input */
-                max-height: 50vh;
-                border-radius: 0;
-                box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-            }
-
+            /* Controles reubicados para móvil */
             .custom-controls-container {
                 top: 10px;
                 left: 10px;
                 gap: 8px;
+            }
+
+            #btn-orientation {
+                top: 10px;
+                left: 64px;
+                width: 44px;
+                height: 44px;
+                font-size: 1.1rem;
+            }
+
+            .search-results {
+                position: absolute;
+                max-height: 50vh;
+                border-radius: 0;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
             }
 
             .custom-control-btn {
@@ -1132,38 +1309,6 @@
             background: rgba(255, 255, 255, 0.9);
         }
 
-        /* --- ORIENTATION CONTROLS --- */
-        .orientation-controls {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .orientation-btn {
-            background: white;
-            border: none;
-            border-radius: var(--border-radius);
-            width: 46px;
-            height: 46px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-medium);
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--prov-gray-dark);
-            font-size: 1.2rem;
-        }
-
-        .orientation-btn.active {
-            background: var(--prov-blue-alt);
-            color: white;
-        }
-
         /* --- VOICE CONTROLS --- */
         .voice-controls {
             display: flex;
@@ -1189,6 +1334,24 @@
     </style>
 </head>
 <body>
+    <!-- Pantalla de Bienvenida (Splash Screen) -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <i class="fas fa-tractor"></i>
+            </div>
+            <h1>Caminos Calidad Providencia</h1>
+            <p class="splash-subtitle">Sistema de Optimización de Rutas</p>
+            <p class="splash-message">Bienvenido al sistema de rutas del Ingenio.<br>Explora, planifica y recorre los caminos del territorio de forma clara y segura.</p>
+            <div class="splash-loading">
+                <div class="loading-text">Cargando datos...</div>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Estado de la aplicación -->
     <div class="app-state" id="app-state">
         <i class="fas fa-circle" style="color: #4CAF50; font-size: 0.6rem;"></i>
@@ -1396,12 +1559,12 @@
                 <!-- Información de la app -->
                 <div style="padding: 25px 0; text-align: center; font-size: 0.9rem; color: var(--prov-gray-medium);">
                     <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                        <i class="fas fa-leaf" style="color: var(--prov-green-main); font-size: 1.2rem;"></i>
-                        <span style="font-weight: 500;">Sistema de Optimización de Rutas Rurales</span>
+                        <i class="fas fa-tractor" style="color: var(--prov-green-main); font-size: 1.2rem;"></i>
+                        <span style="font-weight: 500;">Sistema de ruteo para labores agrícolas</span>
                     </div>
                     <div style="font-size: 0.8rem; opacity: 0.7; line-height: 1.4;">
-                        Ingenio Providencia • Departamento Técnico SIG<br>
-                        &copy; 2025 • Versión 3.0.0
+                        Ingenio Providencia • Área de Calidad de Labores<br>
+                        &copy; 2025 • Elaboración: Angie Fernanda Maya
                     </div>
                 </div>
             </div>
@@ -1409,7 +1572,7 @@
 
         <!-- Mapa principal -->
         <main id="map-wrapper">
-            <!-- Controles personalizados -->
+            <!-- Controles personalizados (izquierda) -->
             <div class="custom-controls-container">
                 <button class="custom-control-btn" id="btn-north" onclick="resetNorth()" title="Reorientar al Norte">
                     <i class="fas fa-compass"></i>
@@ -1428,12 +1591,10 @@
                 </button>
             </div>
 
-            <!-- Controles de orientación -->
-            <div class="orientation-controls">
-                <button class="orientation-btn" id="btn-orientation" onclick="toggleDeviceOrientation()" title="Orientar por GPS">
-                    <i class="fas fa-location-arrow"></i>
-                </button>
-            </div>
+            <!-- Botón de orientación (REUBICADO A IZQUIERDA) -->
+            <button class="custom-control-btn" id="btn-orientation" onclick="toggleDeviceOrientation()" title="Orientar por GPS">
+                <i class="fas fa-location-arrow"></i>
+            </button>
 
             <!-- Panel de controles de capas -->
             <div class="layer-controls" id="layer-controls">
@@ -1454,7 +1615,7 @@
                         <span>Vista Satélite</span>
                     </label>
                     <label class="switch">
-                        <input type="checkbox" id="toggle-satelite">
+                        <input type="checkbox" id="toggle-satelite" checked>
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -1493,6 +1654,9 @@
         // 1. CONFIGURACIÓN INICIAL Y VARIABLES GLOBALES
         // ============================================
         
+        // Mostrar splash screen inicialmente
+        document.getElementById('splash-screen').style.display = 'flex';
+        
         // Configuración del mapa
         var map = L.map('map', {
             zoomControl: false,
@@ -1525,8 +1689,8 @@
             minZoom: 10
         });
 
-        // Añadir capa por defecto
-        calles.addTo(map);
+        // Añadir capa SATELITAL por defecto (REQUERIMIENTO)
+        satelite.addTo(map);
         L.control.zoom({ position: 'topright' }).addTo(map);
         L.control.fullscreen({ position: 'topright' }).addTo(map);
         
@@ -1593,7 +1757,24 @@
         }
 
         // ============================================
-        // 2. BÚSQUEDA SIMPLIFICADA (VERSIÓN ANTERIOR QUE FUNCIONABA)
+        // 2. FUNCIÓN PARA OCULTAR SPLASH SCREEN
+        // ============================================
+        
+        function hideSplashScreen() {
+            var splashScreen = document.getElementById('splash-screen');
+            splashScreen.classList.add('fade-out');
+            
+            setTimeout(function() {
+                splashScreen.style.display = 'none';
+                // Asegurar que el mapa se redibuje correctamente
+                setTimeout(function() {
+                    map.invalidateSize(true);
+                }, 100);
+            }, 800);
+        }
+
+        // ============================================
+        // 3. BÚSQUEDA SIMPLIFICADA
         // ============================================
         
         // Inicializar eventos de búsqueda
@@ -1703,7 +1884,7 @@
         }
 
         // ============================================
-        // 3. CORRECCIÓN: "MI UBICACIÓN" COMO ORIGEN
+        // 4. "MI UBICACIÓN" COMO ORIGEN
         // ============================================
         
         function locateMe() {
@@ -1754,7 +1935,7 @@
         }
 
         // ============================================
-        // 4. CORRECCIÓN: INFORMACIÓN GPS SIMPLIFICADA
+        // 5. INFORMACIÓN GPS SIMPLIFICADA
         // ============================================
         
         // Actualizar panel de información GPS - SOLO VELOCIDAD Y PRECISIÓN
@@ -1810,7 +1991,7 @@
         }
 
         // ============================================
-        // 5. CORRECCIÓN: FONDO AZUL AL ACTIVAR GPS
+        // 6. FONDO AZUL AL ACTIVAR GPS - CORREGIDO
         // ============================================
         
         // Actualizar posición GPS - CORREGIDO PARA EVITAR FONDO AZUL
@@ -1840,7 +2021,7 @@
                         iconSize: [24, 24],
                         iconAnchor: [12, 12]
                     }),
-                    zIndexOffset: 2000  // Aumentado para estar sobre paneles
+                    zIndexOffset: 2000
                 }).addTo(map);
             } else {
                 gpsMarker.setLatLng(latlng);
@@ -1851,9 +2032,9 @@
                 gpsAccuracyCircle = L.circle(latlng, {
                     radius: accuracy,
                     weight: 1,
-                    color: '#757575',  // Cambiado a gris en lugar de azul
-                    fillColor: '#757575',  // Cambiado a gris
-                    fillOpacity: 0.05  // Reducido para ser menos intrusivo
+                    color: '#757575',
+                    fillColor: '#757575',
+                    fillOpacity: 0.05
                 }).addTo(map);
             } else {
                 gpsAccuracyCircle.setLatLng(latlng);
@@ -1875,7 +2056,7 @@
         }
 
         // ============================================
-        // 6. FUNCIONES AUXILIARES
+        // 7. FUNCIONES AUXILIARES
         // ============================================
         
         function getNombre(feature) {
@@ -1924,6 +2105,7 @@
             }
         }
 
+        // Botón de orientación REUBICADO - ya está en posición izquierda
         function toggleDeviceOrientation() {
             var btn = document.getElementById('btn-orientation');
             
@@ -1978,7 +2160,7 @@
         }
 
         // ============================================
-        // 7. SISTEMA DE CAPAS
+        // 8. SISTEMA DE CAPAS - VISTA SATELITAL POR DEFECTO
         // ============================================
         
         // Inicializar capas
@@ -1987,6 +2169,9 @@
             document.getElementById('toggle-haciendas').addEventListener('change', function(e) {
                 toggleHaciendasLayer(e.target.checked);
             });
+            
+            // El checkbox de satélite debe estar activado por defecto
+            document.getElementById('toggle-satelite').checked = true;
             
             document.getElementById('toggle-satelite').addEventListener('change', function(e) {
                 toggleSatelliteLayer(e.target.checked);
@@ -2051,7 +2236,7 @@
         }
 
         // ============================================
-        // 8. GPS EN TIEMPO REAL
+        // 9. GPS EN TIEMPO REAL
         // ============================================
         
         function toggleGpsTracking() {
@@ -2192,7 +2377,7 @@
         }
 
         // ============================================
-        // 9. CARGA DE DATOS GEOESPACIALES
+        // 10. CARGA DE DATOS GEOESPACIALES
         // ============================================
         
         function cargarHaciendas() {
@@ -2210,6 +2395,10 @@
                     console.warn("Usando datos de ejemplo:", err);
                     crearDatosEjemplo();
                     mostrarToast('Cargando datos de ejemplo', 'warning');
+                })
+                .finally(() => {
+                    // Ocultar splash screen después de 5 segundos (o cuando terminen de cargar)
+                    setTimeout(hideSplashScreen, 5000);
                 });
         }
 
@@ -2356,7 +2545,7 @@
         }
 
         // ============================================
-        // 10. GESTIÓN DE PUNTOS EN EL MAPA
+        // 11. GESTIÓN DE PUNTOS EN EL MAPA
         // ============================================
         
         function setPunto(tipo, latlng, nombre) {
@@ -2436,7 +2625,7 @@
         });
 
         // ============================================
-        // 11. CÁLCULO Y VISUALIZACIÓN DE RUTAS
+        // 12. CÁLCULO Y VISUALIZACIÓN DE RUTAS
         // ============================================
         
         function calcularRuta() {
@@ -2600,7 +2789,7 @@
         }
 
         // ============================================
-        // 12. PANEL DE INSTRUCCIONES Y NAVEGACIÓN POR VOZ
+        // 13. PANEL DE INSTRUCCIONES Y NAVEGACIÓN POR VOZ
         // ============================================
         
         function mostrarDatosRuta(ruta) {
@@ -2808,7 +2997,7 @@
         }
 
         // ============================================
-        // 13. NAVEGACIÓN POR VOZ
+        // 14. NAVEGACIÓN POR VOZ
         // ============================================
         
         var speechEnabled = true;
@@ -2907,7 +3096,7 @@
         }
 
         // ============================================
-        // 14. FUNCIONALIDADES ADICIONALES
+        // 15. FUNCIONALIDADES ADICIONALES
         // ============================================
         
         function toggleParada(mostrar) {
@@ -3129,7 +3318,7 @@
         }
 
         // ============================================
-        // 15. INICIALIZACIÓN
+        // 16. INICIALIZACIÓN
         // ============================================
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -3175,6 +3364,13 @@
             
             // Configurar arrastre del panel flotante
             setupDragAndDrop();
+            
+            // Ocultar splash screen automáticamente después de 5 segundos (seguridad)
+            setTimeout(function() {
+                if (document.getElementById('splash-screen').style.display !== 'none') {
+                    hideSplashScreen();
+                }
+            }, 6000);
         });
 
         function setupDragAndDrop() {
