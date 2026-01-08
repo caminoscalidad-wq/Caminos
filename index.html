@@ -803,131 +803,139 @@
             transform: scale(1.05);
         }
 
-        /* --- BOTÓN DE ORIENTACIÓN/MOVIMIENTO (REUBICADO A IZQUIERDA) --- */
-        #btn-orientation {
-            background: white;
-            border: none;
-            border-radius: var(--border-radius);
-            width: 46px;
-            height: 46px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-medium);
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--prov-gray-dark);
-            font-size: 1.2rem;
-            position: absolute;
-            top: 15px;
-            left: 70px;
-            z-index: 1000;
-        }
-
-        #btn-orientation:hover {
-            background: var(--prov-green-light);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-heavy);
-            color: var(--prov-green-dark);
-        }
-
-        #btn-orientation.active {
-            background: var(--prov-blue-alt);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        /* --- ELIMINADO orientation-controls (se reubicó a izquierda) --- */
-
-        .layer-controls {
+        /* --- PANEL DE ORIENTACIÓN REUBICADO A PARTE INFERIOR --- */
+        #orientation-panel {
             position: absolute;
             bottom: 15px;
-            right: 15px;
+            left: 15px;
             z-index: 1000;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-heavy);
-            padding: 20px;
-            width: 280px;
+            padding: 15px;
             display: none;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+            min-width: 250px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0,0,0,0.1);
         }
 
-        .layer-controls h4 {
-            margin: 0 0 15px 0;
-            color: var(--prov-green-dark);
-            font-size: 1.1rem;
+        .orientation-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .orientation-row {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .layer-item {
+        #orientation-slider {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #2196F3, #4CAF50);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        #orientation-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--prov-green-main);
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        #orientation-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--prov-green-dark);
+        }
+
+        /* --- PANEL DE GPS ACTIVO MEJORADO --- */
+        #gps-panel {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            z-index: 1500;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-heavy);
+            min-width: 280px;
+            max-width: 350px;
+            display: none;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.1);
+            cursor: move;
+            user-select: none;
+        }
+
+        #gps-panel-header {
+            padding: 15px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+            font-weight: 600;
         }
 
-        .layer-item:last-child {
+        #gps-panel-content {
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .gps-panel-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .gps-panel-row:last-child {
             border-bottom: none;
         }
 
-        .layer-item label {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            font-size: 1rem;
-            color: var(--prov-gray-dark);
-            flex: 1;
+        .gps-panel-label {
+            font-size: 0.9rem;
+            color: var(--prov-gray-medium);
         }
 
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 26px;
+        .gps-panel-value {
+            font-weight: 600;
+            color: var(--prov-green-dark);
         }
 
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
+        /* --- CAPAS DE RUTA DINÁMICA --- */
+        .route-completed {
+            stroke: #4CAF50;
+            stroke-width: 8;
+            stroke-opacity: 0.8;
+            fill: none;
+            transition: all 0.5s ease-in-out;
         }
 
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: var(--prov-green-main);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(24px);
+        .route-pending {
+            stroke: #d32f2f;
+            stroke-width: 6;
+            stroke-opacity: 0.6;
+            fill: none;
+            stroke-dasharray: 10, 5;
+            transition: all 0.5s ease-in-out;
         }
 
         /* --- MAPA Y CONTROLES --- */
@@ -942,7 +950,7 @@
         #map {
             width: 100%;
             height: 100%;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease-in-out;
         }
 
         .leaflet-routing-container {
@@ -963,13 +971,6 @@
         }
 
         .leaflet-control-fullscreen {
-            border-radius: var(--border-radius) !important;
-            overflow: hidden;
-            box-shadow: var(--shadow-medium) !important;
-        }
-
-        /* --- COMPASS CONTROL --- */
-        .leaflet-control-compass {
             border-radius: var(--border-radius) !important;
             overflow: hidden;
             box-shadow: var(--shadow-medium) !important;
@@ -1037,23 +1038,6 @@
             box-shadow: var(--shadow-light);
         }
 
-        /* --- GPS INFO PANEL --- */
-        #gps-info {
-            position: absolute;
-            bottom: 80px;
-            left: 15px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: var(--border-radius);
-            padding: 15px;
-            box-shadow: var(--shadow-heavy);
-            z-index: 1000;
-            max-width: 280px;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            backdrop-filter: blur(5px);
-        }
-
         /* --- MARCADORES PERSONALIZADOS --- */
         .custom-marker {
             background: white;
@@ -1083,12 +1067,80 @@
             color: var(--prov-red-route);
         }
 
-        /* --- GPS TRACK LINE --- */
-        .gps-track {
-            stroke: #2196F3;
-            stroke-width: 4;
-            stroke-opacity: 0.7;
-            fill: none;
+        /* --- ANIMACIONES DE CARGA --- */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spinning {
+            animation: spin 1s linear infinite;
+        }
+
+        /* --- ROTACIONES PARA ICONOS --- */
+        .rotate-45 {
+            transform: rotate(45deg);
+        }
+
+        .rotate-90 {
+            transform: rotate(90deg);
+        }
+
+        .rotate-135 {
+            transform: rotate(135deg);
+        }
+
+        /* --- ESTADO DE LA APP --- */
+        .app-state {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            box-shadow: var(--shadow-medium);
+            font-size: 0.9rem;
+            color: var(--prov-gray-medium);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        /* --- VOICE CONTROLS --- */
+        .voice-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .voice-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 0.9rem;
+            background: linear-gradient(135deg, #673ab7, #512da8);
+            color: white;
+        }
+
+        .voice-btn.stop {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+
+        .voice-btn:hover {
+            transform: translateY(-2px);
         }
 
         /* --- RESPONSIVE MOBILE - MEJORADO --- */
@@ -1192,14 +1244,6 @@
                 gap: 8px;
             }
 
-            #btn-orientation {
-                top: 10px;
-                left: 64px;
-                width: 44px;
-                height: 44px;
-                font-size: 1.1rem;
-            }
-
             .search-results {
                 position: absolute;
                 max-height: 50vh;
@@ -1241,95 +1285,40 @@
                 height: calc(100% - var(--mobile-sidebar-height));
             }
 
+            /* Paneles responsivos */
+            #gps-panel {
+                top: auto;
+                bottom: 100px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                width: auto;
+            }
+
+            #orientation-panel {
+                bottom: 100px;
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+
             .layer-controls {
                 width: calc(100% - 30px);
                 max-width: 320px;
                 bottom: 80px;
                 right: 15px;
             }
+        }
 
-            #gps-info {
-                left: 10px;
-                right: 10px;
-                max-width: none;
-                bottom: 100px;
+        @media (max-width: 480px) {
+            #gps-panel {
+                bottom: 80px;
+                max-height: 200px;
             }
-        }
-
-        /* --- ANIMACIONES DE CARGA --- */
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-
-        .loading {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .spinning {
-            animation: spin 1s linear infinite;
-        }
-
-        /* --- ROTACIONES PARA ICONOS --- */
-        .rotate-45 {
-            transform: rotate(45deg);
-        }
-
-        .rotate-90 {
-            transform: rotate(90deg);
-        }
-
-        .rotate-135 {
-            transform: rotate(135deg);
-        }
-
-        /* --- ESTADO DE LA APP --- */
-        .app-state {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            background: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            box-shadow: var(--shadow-medium);
-            font-size: 0.9rem;
-            color: var(--prov-gray-medium);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            backdrop-filter: blur(5px);
-            background: rgba(255, 255, 255, 0.9);
-        }
-
-        /* --- VOICE CONTROLS --- */
-        .voice-controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .voice-btn {
-            flex: 1;
-            padding: 12px;
-            font-size: 0.9rem;
-            background: linear-gradient(135deg, #673ab7, #512da8);
-            color: white;
-        }
-
-        .voice-btn.stop {
-            background: linear-gradient(135deg, #f44336, #d32f2f);
-        }
-
-        .voice-btn:hover {
-            transform: translateY(-2px);
+            
+            #orientation-panel {
+                bottom: 80px;
+            }
         }
     </style>
 </head>
@@ -1370,8 +1359,79 @@
         <span id="gps-status-text">GPS desconectado</span>
     </div>
 
-    <!-- GPS Info Panel -->
-    <div id="gps-info"></div>
+    <!-- Panel de GPS Activo (mejorado - Prompt 1) -->
+    <div id="gps-panel">
+        <div id="gps-panel-header">
+            <span><i class="fas fa-satellite"></i> GPS ACTIVO</span>
+            <button class="panel-close-btn" onclick="toggleGpsPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="gps-panel-content">
+            <div class="gps-panel-row">
+                <span class="gps-panel-label">Velocidad</span>
+                <span class="gps-panel-value" id="gps-speed">0 km/h</span>
+            </div>
+            <div class="gps-panel-row">
+                <span class="gps-panel-label">Precisión</span>
+                <span class="gps-panel-value" id="gps-accuracy">0 m</span>
+            </div>
+            <div class="gps-panel-row">
+                <span class="gps-panel-label">Coordenadas</span>
+                <span class="gps-panel-value" id="gps-coords">0, 0</span>
+            </div>
+            <div class="gps-panel-row">
+                <span class="gps-panel-label">Tiempo activo</span>
+                <span class="gps-panel-value" id="gps-uptime">0s</span>
+            </div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button onclick="stopGpsTracking()" style="
+                    background: #f44336; color: white; border: none;
+                    padding: 10px 20px; border-radius: 6px; font-size: 0.9rem;
+                    cursor: pointer; width: 100%; display: flex; align-items: center;
+                    justify-content: center; gap: 8px; font-weight: 500;">
+                    <i class="fas fa-stop"></i> Detener Seguimiento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de Orientación (Prompt 2) -->
+    <div id="orientation-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="font-weight: 600; color: var(--prov-green-dark);">
+                <i class="fas fa-compass"></i> Orientación del Mapa
+            </span>
+            <button class="panel-close-btn" onclick="toggleOrientationPanel()" style="width: 30px; height: 30px;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="orientation-controls">
+            <div class="orientation-row">
+                <span style="font-size: 0.9rem;">Orientación automática:</span>
+                <label class="switch">
+                    <input type="checkbox" id="toggle-auto-orientation">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="orientation-row">
+                <span style="font-size: 0.9rem;">Ángulo manual:</span>
+                <input type="range" id="orientation-slider" min="0" max="360" value="0" step="1">
+                <span id="orientation-value">0°</span>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button onclick="rotateMapBy(-90)" style="flex: 1; padding: 8px; font-size: 0.9rem;">
+                    <i class="fas fa-undo"></i> -90°
+                </button>
+                <button onclick="resetNorth()" style="flex: 1; padding: 8px; font-size: 0.9rem;">
+                    <i class="fas fa-compass"></i> Norte
+                </button>
+                <button onclick="rotateMapBy(90)" style="flex: 1; padding: 8px; font-size: 0.9rem;">
+                    <i class="fas fa-redo"></i> +90°
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Contenedor principal -->
     <div id="app-container">
@@ -1586,15 +1646,18 @@
                 <button class="custom-control-btn" id="btn-gps-track" onclick="toggleGpsTracking()" title="Seguimiento GPS">
                     <i class="fas fa-crosshairs"></i>
                 </button>
+                <!-- Botón para panel de orientación (Prompt 2) -->
+                <button class="custom-control-btn" id="btn-orientation" onclick="toggleOrientationPanel()" title="Orientación del Mapa">
+                    <i class="fas fa-compass"></i>
+                </button>
+                <!-- Botón para panel de GPS (Prompt 1) -->
+                <button class="custom-control-btn" id="btn-gps-panel" onclick="toggleGpsPanel()" title="Panel GPS" style="display: none;">
+                    <i class="fas fa-info-circle"></i>
+                </button>
                 <button class="custom-control-btn" id="btn-download" onclick="descargarVia()" title="Descargar Ruta" style="display: none;">
                     <i class="fas fa-download"></i>
                 </button>
             </div>
-
-            <!-- Botón de orientación (REUBICADO A IZQUIERDA) -->
-            <button class="custom-control-btn" id="btn-orientation" onclick="toggleDeviceOrientation()" title="Orientar por GPS">
-                <i class="fas fa-location-arrow"></i>
-            </button>
 
             <!-- Panel de controles de capas -->
             <div class="layer-controls" id="layer-controls">
@@ -1667,7 +1730,9 @@
             inertiaDeceleration: 3000,
             fadeAnimation: true,
             zoomAnimation: true,
-            tap: false
+            tap: false,
+            zoomSnap: 0.1,
+            zoomDelta: 0.1
         }).setView([3.62, -76.30], 12);
 
         // Capas de mapa base
@@ -1725,14 +1790,26 @@
         var gpsTrackLine = null;
         var gpsTrackPoints = [];
         var gpsCentered = false;
+        var gpsUptimeStart = null;
+        var gpsUptimeInterval = null;
 
-        // Variables para orientación del mapa
+        // Variables para orientación del mapa (Prompt 2)
         var mapRotation = 0;
         var deviceOrientationEnabled = false;
         var previousHeading = 0;
+        var autoOrientationActive = false;
 
         // Variables para capas
         var haciendasLayer = null;
+
+        // Variables para ruta dinámica (Prompt 3)
+        var routeCompletedLayer = null;
+        var routePendingLayer = null;
+        var gpsRouteSyncActive = false;
+        var userPosition = null;
+        var routeSegments = [];
+        var completedDistance = 0;
+        var totalRouteDistance = 0;
 
         // Colores personalizados
         const COLORS = {
@@ -1742,7 +1819,9 @@
             route: '#d32f2f',
             altRoute: '#1976d2',
             selectedPolygon: '#ff5722',
-            gps: '#2196F3'
+            gps: '#2196F3',
+            completed: '#4CAF50',
+            pending: '#d32f2f'
         };
 
         // Íconos personalizados
@@ -1774,7 +1853,558 @@
         }
 
         // ============================================
-        // 3. BÚSQUEDA SIMPLIFICADA
+        // 3. PANEL DE GPS ACTIVO - PROMPT 1
+        // ============================================
+        
+        function toggleGpsPanel() {
+            var panel = document.getElementById('gps-panel');
+            var btn = document.getElementById('btn-gps-panel');
+            
+            if (panel.style.display === 'flex') {
+                panel.style.display = 'none';
+                btn.classList.remove('active');
+            } else {
+                panel.style.display = 'flex';
+                btn.classList.add('active');
+                // Iniciar arrastre
+                initPanelDrag('gps-panel', 'gps-panel-header');
+            }
+        }
+        
+        function updateGpsPanel(position) {
+            var panel = document.getElementById('gps-panel');
+            if (!panel) return;
+            
+            // Actualizar información
+            var speed = position.coords.speed ? 
+                (position.coords.speed * 3.6).toFixed(1) + ' km/h' : '0 km/h';
+            var accuracy = Math.round(position.coords.accuracy) + ' m';
+            var coords = position.coords.latitude.toFixed(6) + ', ' + position.coords.longitude.toFixed(6);
+            
+            document.getElementById('gps-speed').textContent = speed;
+            document.getElementById('gps-accuracy').textContent = accuracy;
+            document.getElementById('gps-coords').textContent = coords;
+            
+            // Calcular tiempo activo
+            if (gpsUptimeStart) {
+                var seconds = Math.floor((Date.now() - gpsUptimeStart) / 1000);
+                var minutes = Math.floor(seconds / 60);
+                var hours = Math.floor(minutes / 60);
+                
+                var uptime = '';
+                if (hours > 0) uptime += hours + 'h ';
+                if (minutes > 0) uptime += (minutes % 60) + 'm ';
+                uptime += (seconds % 60) + 's';
+                
+                document.getElementById('gps-uptime').textContent = uptime;
+            }
+        }
+        
+        function startGpsUptime() {
+            gpsUptimeStart = Date.now();
+            if (gpsUptimeInterval) clearInterval(gpsUptimeInterval);
+            
+            gpsUptimeInterval = setInterval(function() {
+                if (gpsUptimeStart) {
+                    var seconds = Math.floor((Date.now() - gpsUptimeStart) / 1000);
+                    var minutes = Math.floor(seconds / 60);
+                    var hours = Math.floor(minutes / 60);
+                    
+                    var uptime = '';
+                    if (hours > 0) uptime += hours + 'h ';
+                    if (minutes > 0) uptime += (minutes % 60) + 'm ';
+                    uptime += (seconds % 60) + 's';
+                    
+                    document.getElementById('gps-uptime').textContent = uptime;
+                }
+            }, 1000);
+        }
+        
+        function stopGpsUptime() {
+            if (gpsUptimeInterval) {
+                clearInterval(gpsUptimeInterval);
+                gpsUptimeInterval = null;
+            }
+            gpsUptimeStart = null;
+        }
+
+        // ============================================
+        // 4. PANEL DE ORIENTACIÓN - PROMPT 2
+        // ============================================
+        
+        function toggleOrientationPanel() {
+            var panel = document.getElementById('orientation-panel');
+            var btn = document.getElementById('btn-orientation');
+            
+            if (panel.style.display === 'flex') {
+                panel.style.display = 'none';
+                btn.classList.remove('active');
+            } else {
+                panel.style.display = 'flex';
+                btn.classList.add('active');
+                // Cerrar otros paneles
+                document.getElementById('layer-controls').style.display = 'none';
+                document.getElementById('btn-layers').classList.remove('active');
+            }
+        }
+        
+        function setupOrientationControls() {
+            var slider = document.getElementById('orientation-slider');
+            var valueDisplay = document.getElementById('orientation-value');
+            var autoToggle = document.getElementById('toggle-auto-orientation');
+            
+            // Configurar slider
+            slider.addEventListener('input', function() {
+                var degrees = parseInt(this.value);
+                valueDisplay.textContent = degrees + '°';
+                
+                if (!autoToggle.checked) {
+                    rotateMapSmooth(degrees);
+                }
+            });
+            
+            // Configurar toggle de orientación automática
+            autoToggle.addEventListener('change', function() {
+                autoOrientationActive = this.checked;
+                
+                if (autoOrientationActive) {
+                    enableDeviceOrientation();
+                    mostrarToast('Orientación automática activada', 'success');
+                } else {
+                    disableDeviceOrientation();
+                    mostrarToast('Orientación automática desactivada', 'info');
+                }
+            });
+            
+            // Inicialmente desactivado
+            autoToggle.checked = false;
+            autoOrientationActive = false;
+        }
+        
+        function rotateMapSmooth(degrees) {
+            mapRotation = degrees % 360;
+            
+            // Usar animación suave
+            var mapContainer = document.getElementById('map');
+            mapContainer.style.transition = 'transform 0.5s ease-in-out';
+            mapContainer.style.transform = `rotate(${mapRotation}deg)`;
+            
+            // Actualizar controles
+            document.querySelectorAll('.leaflet-control-container .leaflet-control').forEach(control => {
+                if (!control.classList.contains('leaflet-control-compass')) {
+                    control.style.transition = 'transform 0.5s ease-in-out';
+                    control.style.transform = `rotate(${-mapRotation}deg)`;
+                }
+            });
+            
+            updateCompass();
+            
+            // Actualizar slider si no está en modo automático
+            if (!autoOrientationActive) {
+                document.getElementById('orientation-slider').value = mapRotation;
+                document.getElementById('orientation-value').textContent = mapRotation + '°';
+            }
+        }
+        
+        function rotateMapBy(degrees) {
+            var newRotation = (mapRotation + degrees) % 360;
+            if (newRotation < 0) newRotation += 360;
+            rotateMapSmooth(newRotation);
+        }
+        
+        function resetNorth() {
+            rotateMapSmooth(0);
+            mostrarToast('Mapa orientado al norte', 'info');
+        }
+        
+        function updateCompass() {
+            var compassIcon = document.querySelector('#btn-north i');
+            if (compassIcon) {
+                compassIcon.style.transform = `rotate(${-mapRotation}deg)`;
+            }
+        }
+        
+        function enableDeviceOrientation() {
+            if (window.DeviceOrientationEvent) {
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission()
+                        .then(permissionState => {
+                            if (permissionState === 'granted') {
+                                window.addEventListener('deviceorientation', handleDeviceOrientation);
+                                deviceOrientationEnabled = true;
+                            }
+                        })
+                        .catch(err => {
+                            mostrarToast('Permiso de orientación denegado', 'error');
+                            document.getElementById('toggle-auto-orientation').checked = false;
+                        });
+                } else {
+                    window.addEventListener('deviceorientation', handleDeviceOrientation);
+                    deviceOrientationEnabled = true;
+                }
+            } else {
+                mostrarToast('Orientación por dispositivo no soportada', 'warning');
+                document.getElementById('toggle-auto-orientation').checked = false;
+            }
+        }
+        
+        function disableDeviceOrientation() {
+            window.removeEventListener('deviceorientation', handleDeviceOrientation);
+            deviceOrientationEnabled = false;
+        }
+        
+        function handleDeviceOrientation(event) {
+            if (event.alpha !== null && autoOrientationActive) {
+                var heading = event.alpha;
+                
+                if (Math.abs(heading - previousHeading) > 1) {
+                    rotateMapSmooth(heading);
+                    previousHeading = heading;
+                }
+            }
+        }
+
+        // ============================================
+        // 5. SINCRONIZACIÓN DINÁMICA DE RUTA CON GPS - PROMPT 3
+        // ============================================
+        
+        function setupDynamicRouteSync() {
+            gpsRouteSyncActive = false;
+            completedDistance = 0;
+            totalRouteDistance = 0;
+            routeSegments = [];
+            
+            // Limpiar capas anteriores
+            if (routeCompletedLayer) {
+                map.removeLayer(routeCompletedLayer);
+                routeCompletedLayer = null;
+            }
+            if (routePendingLayer) {
+                map.removeLayer(routePendingLayer);
+                routePendingLayer = null;
+            }
+        }
+        
+        function initializeRouteSegments(route) {
+            if (!route || !route.coordinates || route.coordinates.length < 2) return;
+            
+            totalRouteDistance = route.summary.totalDistance;
+            completedDistance = 0;
+            routeSegments = [];
+            
+            // Crear segmentos de ruta
+            for (let i = 0; i < route.coordinates.length - 1; i++) {
+                var segment = {
+                    start: route.coordinates[i],
+                    end: route.coordinates[i + 1],
+                    distance: route.coordinates[i].distanceTo(route.coordinates[i + 1]),
+                    completed: false
+                };
+                routeSegments.push(segment);
+            }
+            
+            // Dibujar ruta completa como pendiente inicialmente
+            drawRouteLayers();
+        }
+        
+        function drawRouteLayers() {
+            // Limpiar capas anteriores
+            if (routeCompletedLayer) {
+                map.removeLayer(routeCompletedLayer);
+            }
+            if (routePendingLayer) {
+                map.removeLayer(routePendingLayer);
+            }
+            
+            // Crear arrays de coordenadas completadas y pendientes
+            var completedCoords = [];
+            var pendingCoords = [];
+            
+            // Reconstruir coordenadas basadas en segmentos completados
+            var currentSegment = [];
+            
+            for (let i = 0; i < routeSegments.length; i++) {
+                var segment = routeSegments[i];
+                
+                if (segment.completed) {
+                    if (currentSegment.length === 0) {
+                        currentSegment.push(segment.start);
+                    }
+                    currentSegment.push(segment.end);
+                    
+                    // Si es el último segmento o el siguiente no está completado
+                    if (i === routeSegments.length - 1 || !routeSegments[i + 1].completed) {
+                        completedCoords.push([...currentSegment]);
+                        currentSegment = [];
+                    }
+                } else {
+                    if (currentSegment.length === 0) {
+                        currentSegment.push(segment.start);
+                    }
+                    currentSegment.push(segment.end);
+                    
+                    // Si es el último segmento o el siguiente está completado
+                    if (i === routeSegments.length - 1 || routeSegments[i + 1].completed) {
+                        pendingCoords.push([...currentSegment]);
+                        currentSegment = [];
+                    }
+                }
+            }
+            
+            // Dibujar rutas completadas
+            completedCoords.forEach(coords => {
+                if (coords.length > 1) {
+                    routeCompletedLayer = L.polyline(coords, {
+                        color: COLORS.completed,
+                        weight: 8,
+                        opacity: 0.8,
+                        lineCap: 'round',
+                        lineJoin: 'round',
+                        className: 'route-completed'
+                    }).addTo(map);
+                }
+            });
+            
+            // Dibujar rutas pendientes
+            pendingCoords.forEach(coords => {
+                if (coords.length > 1) {
+                    routePendingLayer = L.polyline(coords, {
+                        color: COLORS.pending,
+                        weight: 6,
+                        opacity: 0.6,
+                        dashArray: '10, 5',
+                        lineCap: 'round',
+                        lineJoin: 'round',
+                        className: 'route-pending'
+                    }).addTo(map);
+                }
+            });
+            
+            // Actualizar progreso
+            updateRouteProgress();
+        }
+        
+        function updateUserPositionOnRoute(position) {
+            if (!gpsRouteSyncActive || !routeSegments.length || !position) return;
+            
+            userPosition = L.latLng(position.coords.latitude, position.coords.longitude);
+            var nearestSegmentIndex = -1;
+            var minDistance = Infinity;
+            
+            // Encontrar el segmento más cercano
+            for (let i = 0; i < routeSegments.length; i++) {
+                var segment = routeSegments[i];
+                var distance = distanceToSegment(userPosition, segment.start, segment.end);
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestSegmentIndex = i;
+                }
+            }
+            
+            // Marcar segmentos como completados basándose en la posición
+            if (nearestSegmentIndex >= 0 && minDistance < 50) { // 50 metros de tolerancia
+                for (let i = 0; i <= nearestSegmentIndex; i++) {
+                    if (!routeSegments[i].completed) {
+                        routeSegments[i].completed = true;
+                        completedDistance += routeSegments[i].distance;
+                    }
+                }
+                
+                // Redibujar rutas
+                drawRouteLayers();
+                
+                // Seguir al usuario si está activo
+                if (gpsCentered) {
+                    map.panTo(userPosition, {
+                        animate: true,
+                        duration: 1,
+                        easeLinearity: 0.25
+                    });
+                }
+            }
+        }
+        
+        function distanceToSegment(point, segmentStart, segmentEnd) {
+            // Calcular distancia de punto a segmento
+            var A = point.lat - segmentStart.lat;
+            var B = point.lng - segmentStart.lng;
+            var C = segmentEnd.lat - segmentStart.lat;
+            var D = segmentEnd.lng - segmentStart.lng;
+            
+            var dot = A * C + B * D;
+            var lenSq = C * C + D * D;
+            var param = lenSq !== 0 ? dot / lenSq : -1;
+            
+            var nearestLat, nearestLng;
+            
+            if (param < 0) {
+                nearestLat = segmentStart.lat;
+                nearestLng = segmentStart.lng;
+            } else if (param > 1) {
+                nearestLat = segmentEnd.lat;
+                nearestLng = segmentEnd.lng;
+            } else {
+                nearestLat = segmentStart.lat + param * C;
+                nearestLng = segmentStart.lng + param * D;
+            }
+            
+            var dx = point.lat - nearestLat;
+            var dy = point.lng - nearestLng;
+            return Math.sqrt(dx * dx + dy * dy) * 111319.9; // Convertir a metros
+        }
+        
+        function updateRouteProgress() {
+            if (totalRouteDistance > 0) {
+                var percent = (completedDistance / totalRouteDistance * 100);
+                document.getElementById('progress-fill').style.width = percent + '%';
+                document.getElementById('progress-percent').textContent = Math.round(percent) + '%';
+            }
+        }
+        
+        function startRouteSync() {
+            if (currentRoute) {
+                gpsRouteSyncActive = true;
+                initializeRouteSegments(currentRoute);
+                mostrarToast('Sincronización de ruta activada', 'success');
+            }
+        }
+        
+        function stopRouteSync() {
+            gpsRouteSyncActive = false;
+        }
+
+        // ============================================
+        // 6. ARRASTRE DE PANELES - PROMPT 4
+        // ============================================
+        
+        function initPanelDrag(panelId, handleId) {
+            var panel = document.getElementById(panelId);
+            var handle = document.getElementById(handleId);
+            
+            if (!panel || !handle) return;
+            
+            var active = false;
+            var currentX, currentY, initialX, initialY;
+            var xOffset = 0, yOffset = 0;
+            
+            // Establecer posición inicial si no está definida
+            if (!panel.style.left && !panel.style.top) {
+                panel.style.left = '20px';
+                panel.style.top = '100px';
+            }
+            
+            handle.addEventListener("touchstart", dragStart, false);
+            handle.addEventListener("touchend", dragEnd, false);
+            handle.addEventListener("touchmove", drag, false);
+            handle.addEventListener("mousedown", dragStart, false);
+            document.addEventListener("mouseup", dragEnd, false);
+            document.addEventListener("mousemove", drag, false);
+            
+            function dragStart(e) {
+                if (e.target.closest('.panel-close-btn')) return;
+                
+                if (e.type === "touchstart") {
+                    initialX = e.touches[0].clientX - xOffset;
+                    initialY = e.touches[0].clientY - yOffset;
+                } else {
+                    initialX = e.clientX - xOffset;
+                    initialY = e.clientY - yOffset;
+                }
+                
+                if (e.target === handle || handle.contains(e.target)) {
+                    active = true;
+                    panel.style.cursor = 'grabbing';
+                }
+            }
+            
+            function dragEnd() {
+                initialX = currentX;
+                initialY = currentY;
+                active = false;
+                panel.style.cursor = 'move';
+            }
+            
+            function drag(e) {
+                if (active) {
+                    e.preventDefault();
+                    
+                    if (e.type === "touchmove") {
+                        currentX = e.touches[0].clientX - initialX;
+                        currentY = e.touches[0].clientY - initialY;
+                    } else {
+                        currentX = e.clientX - initialX;
+                        currentY = e.clientY - initialY;
+                    }
+                    
+                    xOffset = currentX;
+                    yOffset = currentY;
+                    
+                    // Aplicar transformación
+                    panel.style.transform = "translate3d(" + currentX + "px, " + currentY + "px, 0)";
+                }
+            }
+            
+            // Hacer que el panel sea redimensionable en escritorio
+            if (window.innerWidth > 768) {
+                makeResizable(panel);
+            }
+        }
+        
+        function makeResizable(panel) {
+            var resizeHandle = document.createElement('div');
+            resizeHandle.style.cssText = `
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 15px;
+                height: 15px;
+                cursor: se-resize;
+                background: linear-gradient(135deg, transparent 50%, var(--prov-gray-medium) 50%);
+            `;
+            panel.appendChild(resizeHandle);
+            
+            var isResizing = false;
+            var startWidth, startHeight, startX, startY;
+            
+            resizeHandle.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                startWidth = parseInt(getComputedStyle(panel).width, 10);
+                startHeight = parseInt(getComputedStyle(panel).height, 10);
+                startX = e.clientX;
+                startY = e.clientY;
+                
+                document.addEventListener('mousemove', resize);
+                document.addEventListener('mouseup', stopResize);
+            });
+            
+            function resize(e) {
+                if (isResizing) {
+                    var newWidth = startWidth + (e.clientX - startX);
+                    var newHeight = startHeight + (e.clientY - startY);
+                    
+                    // Limitar tamaño mínimo
+                    panel.style.width = Math.max(250, newWidth) + 'px';
+                    panel.style.height = Math.max(150, newHeight) + 'px';
+                    
+                    // Asegurar que el contenido sea desplazable
+                    var content = panel.querySelector('#gps-panel-content, .panel-content');
+                    if (content) {
+                        content.style.maxHeight = (newHeight - 100) + 'px';
+                        content.style.overflowY = 'auto';
+                    }
+                }
+            }
+            
+            function stopResize() {
+                isResizing = false;
+                document.removeEventListener('mousemove', resize);
+                document.removeEventListener('mouseup', stopResize);
+            }
+        }
+
+        // ============================================
+        // 7. BÚSQUEDA SIMPLIFICADA
         // ============================================
         
         // Inicializar eventos de búsqueda
@@ -1884,7 +2514,7 @@
         }
 
         // ============================================
-        // 4. "MI UBICACIÓN" COMO ORIGEN
+        // 8. "MI UBICACIÓN" COMO ORIGEN
         // ============================================
         
         function locateMe() {
@@ -1935,66 +2565,9 @@
         }
 
         // ============================================
-        // 5. INFORMACIÓN GPS SIMPLIFICADA
+        // 9. GPS EN TIEMPO REAL
         // ============================================
         
-        // Actualizar panel de información GPS - SOLO VELOCIDAD Y PRECISIÓN
-        function updateGpsInfo(position) {
-            var infoPanel = document.getElementById('gps-info');
-            if (!infoPanel) {
-                infoPanel = document.createElement('div');
-                infoPanel.id = 'gps-info';
-                infoPanel.style.cssText = `
-                    position: absolute; bottom: 80px; left: 15px;
-                    background: rgba(255, 255, 255, 0.95); padding: 15px;
-                    border-radius: var(--border-radius); box-shadow: var(--shadow-heavy);
-                    z-index: 1000; font-size: 0.9rem; max-width: 280px;
-                    backdrop-filter: blur(5px); display: flex; flex-direction: column; gap: 12px;
-                `;
-                document.getElementById('map-wrapper').appendChild(infoPanel);
-            }
-            
-            // SOLO mostrar velocidad y precisión según requerimiento
-            var speed = position.coords.speed ? 
-                (position.coords.speed * 3.6).toFixed(1) + ' km/h' : 'N/A';
-            var accuracy = Math.round(position.coords.accuracy) + ' m';
-            
-            infoPanel.innerHTML = `
-                <div style="margin-bottom: 5px;">
-                    <strong style="color: #2196F3; display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-satellite"></i> GPS ACTIVO
-                    </strong>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>
-                        <small style="color: var(--prov-gray-medium);">Velocidad</small>
-                        <div style="font-weight: 600; color: var(--prov-green-dark);">${speed}</div>
-                    </div>
-                    <div>
-                        <small style="color: var(--prov-gray-medium);">Precisión</small>
-                        <div style="font-weight: 600; color: #2196F3;">${accuracy}</div>
-                    </div>
-                </div>
-                <div style="margin-top: 10px; text-align: center;">
-                    <button onclick="stopGpsTracking()" style="
-                        background: #f44336; color: white; border: none;
-                        padding: 8px 16px; border-radius: 6px; font-size: 0.9rem;
-                        cursor: pointer; width: 100%; display: flex; align-items: center;
-                        justify-content: center; gap: 8px; font-weight: 500;
-                    ">
-                        <i class="fas fa-stop"></i> Detener Seguimiento
-                    </button>
-                </div>
-            `;
-            
-            infoPanel.style.display = 'flex';
-        }
-
-        // ============================================
-        // 6. FONDO AZUL AL ACTIVAR GPS - CORREGIDO
-        // ============================================
-        
-        // Actualizar posición GPS - CORREGIDO PARA EVITAR FONDO AZUL
         function updateGpsPosition(position) {
             var latlng = L.latLng(position.coords.latitude, position.coords.longitude);
             var accuracy = position.coords.accuracy;
@@ -2027,7 +2600,7 @@
                 gpsMarker.setLatLng(latlng);
             }
             
-            // Círculo de precisión - COLOR MODIFICADO PARA NO CAMBIAR FONDO
+            // Círculo de precisión
             if (!gpsAccuracyCircle) {
                 gpsAccuracyCircle = L.circle(latlng, {
                     radius: accuracy,
@@ -2045,208 +2618,41 @@
             gpsTrackPoints.push([latlng.lat, latlng.lng]);
             updateGpsTrack();
             
-            // Actualizar panel de información
-            updateGpsInfo(position);
+            // Actualizar panel de GPS
+            updateGpsPanel(position);
+            
+            // Actualizar posición en ruta si hay sincronización activa
+            if (gpsRouteSyncActive) {
+                updateUserPositionOnRoute(position);
+            }
             
             // Seguimiento automático
             if (gpsTracking && !gpsCentered) {
-                map.panTo(latlng);
+                map.panTo(latlng, {
+                    animate: true,
+                    duration: 1,
+                    easeLinearity: 0.25
+                });
                 gpsCentered = true;
             }
         }
-
-        // ============================================
-        // 7. FUNCIONES AUXILIARES
-        // ============================================
         
-        function getNombre(feature) {
-            if (!feature) return "Sin nombre";
-            if (typeof feature === 'object' && feature.feature) {
-                feature = feature.feature;
-            }
-            return feature.properties?.Nombre || 
-                   feature.properties?.name || 
-                   feature.properties?.NOMBRE || 
-                   feature.properties?.Hacienda || 
-                   "Ubicación sin nombre";
-        }
-
-        function rotateMap(degrees) {
-            mapRotation = degrees % 360;
+        function updateGpsTrack() {
+            if (gpsTrackPoints.length < 2) return;
             
-            var mapContainer = document.getElementById('map');
-            mapContainer.style.transform = `rotate(${mapRotation}deg)`;
-            
-            document.querySelectorAll('.leaflet-control-container .leaflet-control').forEach(control => {
-                if (!control.classList.contains('leaflet-control-compass')) {
-                    control.style.transform = `rotate(${-mapRotation}deg)`;
-                }
-            });
-            
-            updateCompass();
-        }
-
-        function resetNorth() {
-            rotateMap(0);
-            
-            var btn = document.getElementById('btn-north');
-            btn.style.transform = 'rotate(360deg)';
-            setTimeout(() => {
-                btn.style.transform = '';
-            }, 500);
-            
-            mostrarToast('Mapa orientado al norte', 'info');
-        }
-
-        function updateCompass() {
-            var compassIcon = document.querySelector('#btn-north i');
-            if (compassIcon) {
-                compassIcon.style.transform = `rotate(${-mapRotation}deg)`;
-            }
-        }
-
-        // Botón de orientación REUBICADO - ya está en posición izquierda
-        function toggleDeviceOrientation() {
-            var btn = document.getElementById('btn-orientation');
-            
-            if (!deviceOrientationEnabled) {
-                if (window.DeviceOrientationEvent) {
-                    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                        DeviceOrientationEvent.requestPermission()
-                            .then(permissionState => {
-                                if (permissionState === 'granted') {
-                                    enableDeviceOrientation();
-                                    btn.classList.add('active');
-                                    mostrarToast('Orientación por GPS activada', 'success');
-                                }
-                            })
-                            .catch(err => {
-                                mostrarToast('Permiso de orientación denegado', 'error');
-                            });
-                    } else {
-                        enableDeviceOrientation();
-                        btn.classList.add('active');
-                        mostrarToast('Orientación por GPS activada', 'success');
-                    }
-                } else {
-                    mostrarToast('Orientación por dispositivo no soportada', 'warning');
-                }
+            if (!gpsTrackLine) {
+                gpsTrackLine = L.polyline(gpsTrackPoints, {
+                    color: '#2196F3',
+                    weight: 4,
+                    opacity: 0.7,
+                    smoothFactor: 1,
+                    className: 'gps-track'
+                }).addTo(map);
             } else {
-                disableDeviceOrientation();
-                btn.classList.remove('active');
-                mostrarToast('Orientación por GPS desactivada', 'info');
+                gpsTrackLine.setLatLngs(gpsTrackPoints);
             }
         }
-
-        function enableDeviceOrientation() {
-            window.addEventListener('deviceorientation', handleDeviceOrientation);
-            deviceOrientationEnabled = true;
-        }
-
-        function disableDeviceOrientation() {
-            window.removeEventListener('deviceorientation', handleDeviceOrientation);
-            deviceOrientationEnabled = false;
-        }
-
-        function handleDeviceOrientation(event) {
-            if (event.alpha !== null && gpsMarker) {
-                var heading = event.alpha;
-                
-                if (Math.abs(heading - previousHeading) > 2) {
-                    rotateMap(heading);
-                    previousHeading = heading;
-                }
-            }
-        }
-
-        // ============================================
-        // 8. SISTEMA DE CAPAS - VISTA SATELITAL POR DEFECTO
-        // ============================================
         
-        // Inicializar capas
-        function initLayers() {
-            // Configurar eventos de switches
-            document.getElementById('toggle-haciendas').addEventListener('change', function(e) {
-                toggleHaciendasLayer(e.target.checked);
-            });
-            
-            // El checkbox de satélite debe estar activado por defecto
-            document.getElementById('toggle-satelite').checked = true;
-            
-            document.getElementById('toggle-satelite').addEventListener('change', function(e) {
-                toggleSatelliteLayer(e.target.checked);
-            });
-        }
-
-        // Toggle capa de haciendas
-        function toggleHaciendasLayer(mostrar) {
-            if (haciendasLayer) {
-                if (mostrar) {
-                    map.addLayer(haciendasLayer);
-                    mostrarToast('Capa de haciendas activada', 'success');
-                } else {
-                    map.removeLayer(haciendasLayer);
-                    mostrarToast('Capa de haciendas oculta', 'info');
-                }
-            }
-        }
-
-        function toggleSatellite() {
-            var btn = document.getElementById('btn-satellite');
-            var checkbox = document.getElementById('toggle-satelite');
-            
-            if (map.hasLayer(satelite)) {
-                map.removeLayer(satelite);
-                btn.classList.remove('active');
-                checkbox.checked = false;
-                mostrarToast('Vista satélite desactivada', 'info');
-            } else {
-                satelite.addTo(map);
-                btn.classList.add('active');
-                checkbox.checked = true;
-                mostrarToast('Vista satélite activada', 'success');
-            }
-        }
-
-        function toggleSatelliteLayer(mostrar) {
-            var btn = document.getElementById('btn-satellite');
-            
-            if (mostrar) {
-                satelite.addTo(map);
-                btn.classList.add('active');
-                mostrarToast('Vista satélite activada', 'success');
-            } else {
-                map.removeLayer(satelite);
-                btn.classList.remove('active');
-                mostrarToast('Vista satélite desactivada', 'info');
-            }
-        }
-
-        function toggleLayerControls() {
-            var controls = document.getElementById('layer-controls');
-            var btn = document.getElementById('btn-layers');
-            
-            if (controls.style.display === 'flex') {
-                controls.style.display = 'none';
-                btn.classList.remove('active');
-            } else {
-                controls.style.display = 'flex';
-                btn.classList.add('active');
-            }
-        }
-
-        // ============================================
-        // 9. GPS EN TIEMPO REAL
-        // ============================================
-        
-        function toggleGpsTracking() {
-            if (!gpsTracking) {
-                startGpsTracking();
-            } else {
-                stopGpsTracking();
-            }
-        }
-
         function startGpsTracking() {
             if (!navigator.geolocation) {
                 mostrarToast('Geolocalización no soportada', 'error');
@@ -2276,11 +2682,16 @@
                     );
                     
                     gpsTracking = true;
+                    startGpsUptime();
                     updateGpsStatus('GPS activo', '#4CAF50');
                     mostrarToast('Seguimiento GPS activado', 'success');
                     
-                    // Actualizar botón
+                    // Actualizar botones
                     document.getElementById('btn-gps-track').classList.add('active');
+                    document.getElementById('btn-gps-panel').style.display = 'flex';
+                    
+                    // Mostrar panel de GPS
+                    toggleGpsPanel();
                     
                     // Centrar en posición inicial
                     map.setView([position.coords.latitude, position.coords.longitude], 16);
@@ -2288,28 +2699,17 @@
                     // Iniciar línea de trayectoria
                     gpsTrackPoints = [[position.coords.latitude, position.coords.longitude]];
                     updateGpsTrack();
+                    
+                    // Activar sincronización de ruta si hay una ruta calculada
+                    if (currentRoute) {
+                        startRouteSync();
+                    }
                 },
                 handleGpsError,
                 options
             );
         }
-
-        function updateGpsTrack() {
-            if (gpsTrackPoints.length < 2) return;
-            
-            if (!gpsTrackLine) {
-                gpsTrackLine = L.polyline(gpsTrackPoints, {
-                    color: '#2196F3',
-                    weight: 4,
-                    opacity: 0.7,
-                    smoothFactor: 1,
-                    className: 'gps-track'
-                }).addTo(map);
-            } else {
-                gpsTrackLine.setLatLngs(gpsTrackPoints);
-            }
-        }
-
+        
         function stopGpsTracking() {
             if (gpsWatchId !== null) {
                 navigator.geolocation.clearWatch(gpsWatchId);
@@ -2318,6 +2718,8 @@
             
             gpsTracking = false;
             gpsCentered = false;
+            stopGpsUptime();
+            stopRouteSync();
             
             if (gpsMarker) {
                 map.removeLayer(gpsMarker);
@@ -2334,16 +2736,16 @@
                 gpsTrackLine = null;
             }
             
-            var infoPanel = document.getElementById('gps-info');
-            if (infoPanel) {
-                infoPanel.style.display = 'none';
-            }
+            // Ocultar panel de GPS
+            document.getElementById('gps-panel').style.display = 'none';
+            document.getElementById('btn-gps-panel').style.display = 'none';
+            document.getElementById('btn-gps-panel').classList.remove('active');
             
             updateGpsStatus('GPS desconectado', '#9E9E9E');
             document.getElementById('btn-gps-track').classList.remove('active');
             mostrarToast('Seguimiento GPS detenido', 'info');
         }
-
+        
         function handleGpsError(error) {
             var message = '';
             switch(error.code) {
@@ -2364,7 +2766,7 @@
             mostrarToast('Error GPS: ' + message, 'error');
             stopGpsTracking();
         }
-
+        
         function updateGpsStatus(text, color) {
             var statusEl = document.getElementById('gps-status');
             var textEl = document.getElementById('gps-status-text');
@@ -2401,7 +2803,7 @@
                     setTimeout(hideSplashScreen, 5000);
                 });
         }
-
+        
         function crearDatosEjemplo() {
             dbHaciendas = [
                 {
@@ -2467,7 +2869,7 @@
             ];
             processHaciendasData(dbHaciendas);
         }
-
+        
         function processHaciendasData(data) {
             haciendasLayer = L.geoJSON(data, {
                 style: function(feature) {
@@ -2543,6 +2945,18 @@
                 map.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
             }
         }
+        
+        function getNombre(feature) {
+            if (!feature) return "Sin nombre";
+            if (typeof feature === 'object' && feature.feature) {
+                feature = feature.feature;
+            }
+            return feature.properties?.Nombre || 
+                   feature.properties?.name || 
+                   feature.properties?.NOMBRE || 
+                   feature.properties?.Hacienda || 
+                   "Ubicación sin nombre";
+        }
 
         // ============================================
         // 11. GESTIÓN DE PUNTOS EN EL MAPA
@@ -2600,7 +3014,7 @@
                 setTimeout(calcularRuta, 500);
             }
         }
-
+        
         function activarManual(tipo) {
             modoManual = tipo;
             document.getElementById('map').style.cursor = 'crosshair';
@@ -2614,7 +3028,7 @@
                 toggleSidebar();
             }
         }
-
+        
         // Evento de clic en el mapa
         map.on('click', function(e) {
             if (modoManual) {
@@ -2653,6 +3067,9 @@
                 highlightLayer = null;
             }
             
+            // Limpiar capas de ruta dinámica
+            setupDynamicRouteSync();
+            
             // Mostrar loading
             var routeBtn = document.getElementById('btn-calcular');
             var routeLoading = document.getElementById('route-loading');
@@ -2688,16 +3105,16 @@
                 formatter: new L.Routing.Formatter({ language: 'es' }),
                 showAlternatives: true,
                 lineOptions: {
-                    styles: [{color: COLORS.route, opacity: 0.9, weight: 8}],
+                    styles: [{color: COLORS.route, opacity: 0, weight: 0}], // Ocultar línea por defecto
                     addWaypoints: false,
                     extendToWaypoints: true,
                     missingRouteTolerance: 10
                 },
                 altLineOptions: {
                     styles: [
-                        {color: COLORS.altRoute, opacity: 0.7, weight: 6, dashArray: '15, 10'},
-                        {color: '#f39c12', opacity: 0.7, weight: 6, dashArray: '20, 15'},
-                        {color: '#2ecc71', opacity: 0.7, weight: 6, dashArray: '25, 20'}
+                        {color: COLORS.altRoute, opacity: 0, weight: 0},
+                        {color: '#f39c12', opacity: 0, weight: 0},
+                        {color: '#2ecc71', opacity: 0, weight: 0}
                     ]
                 },
                 createMarker: () => null,
@@ -2710,6 +3127,9 @@
                 rutasEncontradas = e.routes;
                 rutaIndex = 0;
                 currentRoute = rutasEncontradas[0];
+                
+                // Inicializar segmentos de ruta para sincronización dinámica
+                initializeRouteSegments(currentRoute);
                 
                 // Mostrar datos de la ruta
                 mostrarDatosRuta(currentRoute);
@@ -2752,6 +3172,11 @@
                         document.getElementById('mobile-instructions').style.display = 'block';
                     }
                 }, 500);
+                
+                // Activar sincronización si el GPS está activo
+                if (gpsTracking) {
+                    startRouteSync();
+                }
             });
             
             controlRuta.on('routingerror', function(e) {
@@ -2764,12 +3189,15 @@
                 document.getElementById('route-info').style.display = 'none';
             });
         }
-
+        
         function cambiarRutaAlternativa() {
             if (!rutasEncontradas || rutasEncontradas.length < 2) return;
             
             rutaIndex = (rutaIndex + 1) % rutasEncontradas.length;
             currentRoute = rutasEncontradas[rutaIndex];
+            
+            // Reinicializar segmentos de ruta
+            initializeRouteSegments(currentRoute);
             
             // Actualizar visualización
             mostrarDatosRuta(currentRoute);
@@ -2787,7 +3215,7 @@
             
             mostrarToast(`Cambiada a ruta alternativa ${rutaIndex + 1}`, 'info');
         }
-
+        
         // ============================================
         // 13. PANEL DE INSTRUCCIONES Y NAVEGACIÓN POR VOZ
         // ============================================
@@ -2839,7 +3267,7 @@
             // Actualizar panel de instrucciones
             updateInstructionsPanel(ruta);
         }
-
+        
         function updateInstructionsPanel(ruta) {
             var summaryPanel = document.getElementById('route-summary');
             var contentPanel = document.getElementById('directions-content');
@@ -2896,7 +3324,7 @@
             // Progreso
             actualizarProgresoRuta(ruta);
         }
-
+        
         function getStepIcon(type, mod) {
             switch(type) {
                 case 'Head': return 'fas fa-road';
@@ -2916,13 +3344,13 @@
                     return 'fas fa-arrow-up';
             }
         }
-
+        
         function formatStepDistance(meters) {
             if (meters === 0) return "";
             if (meters >= 1000) return (meters / 1000).toFixed(1) + ' km';
             return Math.round(meters) + ' m';
         }
-
+        
         function createInstructionStep(num, text, distance, iconClass) {
             var div = document.createElement('div');
             div.className = 'instruction-step';
@@ -2937,7 +3365,7 @@
             `;
             return div;
         }
-
+        
         function actualizarProgresoRuta(ruta) {
             var totalDist = ruta.summary.totalDistance;
             
@@ -2960,7 +3388,7 @@
                 document.getElementById('progress-percent').textContent = Math.round(percent) + '%';
             }, 50);
         }
-
+        
         function toggleInstrucciones(mostrar) {
             var panel = document.getElementById('floating-directions');
             var btnInstr = document.getElementById('btn-instr');
@@ -3031,7 +3459,7 @@
                 }
             }, 1000);
         }
-
+        
         function speakInstructions() {
             if (!speechEnabled || !currentRoute) {
                 mostrarToast('No hay instrucciones para leer', 'warning');
@@ -3086,7 +3514,7 @@
             currentSpeech = utterance;
             speechSynthesis.speak(utterance);
         }
-
+        
         function stopSpeaking() {
             if (speechSynthesis.speaking) {
                 speechSynthesis.cancel();
@@ -3119,7 +3547,7 @@
                 }
             }
         }
-
+        
         function descargarVia() {
             if (!currentRoute) {
                 mostrarToast('No hay ruta calculada para descargar', 'warning');
@@ -3155,7 +3583,7 @@
             
             mostrarToast('Ruta descargada como GeoJSON', 'success');
         }
-
+        
         function eliminarVia() {
             if (controlRuta) {
                 map.removeControl(controlRuta);
@@ -3164,6 +3592,9 @@
             
             currentRoute = null;
             rutasEncontradas = [];
+            
+            // Limpiar capas de ruta dinámica
+            setupDynamicRouteSync();
             
             // Actualizar UI
             document.getElementById('route-info').style.display = 'none';
@@ -3175,7 +3606,7 @@
             
             mostrarToast('Ruta eliminada del mapa', 'info');
         }
-
+        
         function limpiarTodo() {
             if (Object.values(puntos).some(p => p !== null) && 
                 !confirm('¿Está seguro de que desea borrar toda la información actual?')) {
@@ -3210,6 +3641,11 @@
             // Ocultar controles
             document.getElementById('layer-controls').style.display = 'none';
             document.getElementById('btn-layers').classList.remove('active');
+            document.getElementById('orientation-panel').style.display = 'none';
+            document.getElementById('btn-orientation').classList.remove('active');
+            document.getElementById('gps-panel').style.display = 'none';
+            document.getElementById('btn-gps-panel').style.display = 'none';
+            document.getElementById('btn-gps-panel').classList.remove('active');
             
             // Ocultar resultados de búsqueda
             document.querySelectorAll('.search-results').forEach(list => {
@@ -3233,7 +3669,7 @@
             
             mostrarToast('Sistema reiniciado. Listo para nueva consulta.', 'success');
         }
-
+        
         function actualizarEstadoApp() {
             var state = document.getElementById('app-state');
             var icon = state.querySelector('i');
@@ -3253,7 +3689,7 @@
                 text.textContent = 'Seleccione ubicaciones';
             }
         }
-
+        
         function toggleSidebar() {
             var sb = document.getElementById('sidebar');
             var toggleBtn = document.getElementById('sidebar-toggle');
@@ -3285,7 +3721,7 @@
                 }
             }, 350);
         }
-
+        
         function mostrarToast(mensaje, tipo = 'info') {
             var toast = document.getElementById('toast');
             var toastMsg = document.getElementById('toast-message');
@@ -3318,7 +3754,84 @@
         }
 
         // ============================================
-        // 16. INICIALIZACIÓN
+        // 16. SISTEMA DE CAPAS
+        // ============================================
+        
+        function initLayers() {
+            // Configurar eventos de switches
+            document.getElementById('toggle-haciendas').addEventListener('change', function(e) {
+                toggleHaciendasLayer(e.target.checked);
+            });
+            
+            // El checkbox de satélite debe estar activado por defecto
+            document.getElementById('toggle-satelite').checked = true;
+            
+            document.getElementById('toggle-satelite').addEventListener('change', function(e) {
+                toggleSatelliteLayer(e.target.checked);
+            });
+        }
+        
+        function toggleHaciendasLayer(mostrar) {
+            if (haciendasLayer) {
+                if (mostrar) {
+                    map.addLayer(haciendasLayer);
+                    mostrarToast('Capa de haciendas activada', 'success');
+                } else {
+                    map.removeLayer(haciendasLayer);
+                    mostrarToast('Capa de haciendas oculta', 'info');
+                }
+            }
+        }
+        
+        function toggleSatellite() {
+            var btn = document.getElementById('btn-satellite');
+            var checkbox = document.getElementById('toggle-satelite');
+            
+            if (map.hasLayer(satelite)) {
+                map.removeLayer(satelite);
+                btn.classList.remove('active');
+                checkbox.checked = false;
+                mostrarToast('Vista satélite desactivada', 'info');
+            } else {
+                satelite.addTo(map);
+                btn.classList.add('active');
+                checkbox.checked = true;
+                mostrarToast('Vista satélite activada', 'success');
+            }
+        }
+        
+        function toggleSatelliteLayer(mostrar) {
+            var btn = document.getElementById('btn-satellite');
+            
+            if (mostrar) {
+                satelite.addTo(map);
+                btn.classList.add('active');
+                mostrarToast('Vista satélite activada', 'success');
+            } else {
+                map.removeLayer(satelite);
+                btn.classList.remove('active');
+                mostrarToast('Vista satélite desactivada', 'info');
+            }
+        }
+        
+        function toggleLayerControls() {
+            var controls = document.getElementById('layer-controls');
+            var btn = document.getElementById('btn-layers');
+            
+            if (controls.style.display === 'flex') {
+                controls.style.display = 'none';
+                btn.classList.remove('active');
+            } else {
+                controls.style.display = 'flex';
+                btn.classList.add('active');
+                // Cerrar otros paneles
+                document.getElementById('orientation-panel').style.display = 'none';
+                document.getElementById('btn-orientation').classList.remove('active');
+            }
+        }
+
+        // ============================================
+        // 17. INICIALIZACIÓN
         // ============================================
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -3329,6 +3842,7 @@
             initSearchEvents();
             initLayers();
             initSpeechSynthesis();
+            setupOrientationControls();
             
             // Configurar evento de clic en mapa
             map.on('click', function(e) {
@@ -3353,12 +3867,21 @@
             document.addEventListener('click', function(e) {
                 var layerControls = document.getElementById('layer-controls');
                 var btnLayers = document.getElementById('btn-layers');
+                var orientationPanel = document.getElementById('orientation-panel');
+                var btnOrientation = document.getElementById('btn-orientation');
                 
                 if (layerControls.style.display === 'flex' && 
                     !layerControls.contains(e.target) && 
                     !btnLayers.contains(e.target)) {
                     layerControls.style.display = 'none';
                     btnLayers.classList.remove('active');
+                }
+                
+                if (orientationPanel.style.display === 'flex' && 
+                    !orientationPanel.contains(e.target) && 
+                    !btnOrientation.contains(e.target)) {
+                    orientationPanel.style.display = 'none';
+                    btnOrientation.classList.remove('active');
                 }
             });
             
@@ -3372,7 +3895,7 @@
                 }
             }, 6000);
         });
-
+        
         function setupDragAndDrop() {
             var dragItem = document.getElementById('floating-directions');
             var dragHandle = document.getElementById('drag-handle');
