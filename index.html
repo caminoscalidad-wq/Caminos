@@ -2036,13 +2036,13 @@
     </div>
         <script>
         // ============================================
-        // 1. CONFIGURACIÓN INICIAL Y VARIABLES GLOBALES
+        // 1. CONFIGURACIÓN INICIAL MEJORADA PARA MÓVIL
         // ============================================
         
         // Mostrar splash screen inicialmente
         document.getElementById('splash-screen').style.display = 'flex';
         
-        // Configuración del mapa optimizada para fluidez
+        // Configuración del mapa optimizada para móvil
         var map = L.map('map', {
             zoomControl: false,
             maxBounds: [[3.0, -77.0], [4.5, -75.5]],
@@ -2052,13 +2052,23 @@
             inertiaDeceleration: 3000,
             fadeAnimation: true,
             zoomAnimation: true,
-            tap: false,
+            tap: L.Browser.touch ? false : true, // Mejor para táctil
             zoomSnap: 0.1,
             zoomDelta: 0.1,
             wheelPxPerZoomLevel: 120,
             smoothMovement: true,
             easeLinearity: 0.2,
-            trackResize: true
+            trackResize: true,
+            // Mejoras específicas para táctil
+            touchZoom: true,
+            bounceAtZoomLimits: true,
+            scrollWheelZoom: 'center',
+            dragging: true,
+            inertiaDeceleration: 2500,
+            inertiaMaxSpeed: 1000,
+            easeLinearity: 0.25,
+            // Desactivar doble click zoom en móvil
+            doubleClickZoom: !L.Browser.touch
         }).setView([3.62, -76.30], 12);
 
         // Añadir clase para transiciones suaves
@@ -2106,7 +2116,7 @@
         var baseLayers = {
             "Mapa Carreteras": calles,
             "Vista Satélite": satelite,
-            "Mapa Topográfico": topografico
+            
         };
         
         L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
@@ -2148,6 +2158,7 @@
 
         // Variables para capas
         var haciendasLayer = null;
+        var haciendasVisible = true; // Nueva variable para control de visibilidad
 
         // Variables para ruta dinámica
         var routeCompletedLayer = null;
@@ -4626,12 +4637,21 @@
         }
         
         function toggleHaciendasLayer(mostrar) {
+            haciendasVisible = mostrar;
             if (haciendasLayer) {
                 if (mostrar) {
                     map.addLayer(haciendasLayer);
+                    // Remover clase de deshabilitado
+                    document.querySelectorAll('.hacienda-polygon').forEach(el => {
+                        el.parentElement.classList.remove('hacienda-layer-disabled');
+                    });
                     mostrarToast('Capa de haciendas activada', 'success');
                 } else {
                     map.removeLayer(haciendasLayer);
+                    // Añadir clase de deshabilitado para referencia
+                    document.querySelectorAll('.hacienda-polygon').forEach(el => {
+                        el.parentElement.classList.add('hacienda-layer-disabled');
+                    });
                     mostrarToast('Capa de haciendas oculta', 'info');
                 }
             }
@@ -5036,35 +5056,7 @@
             }, 6000);
         });
 
-        // ============================================
-        // 12. FUNCIÓN cargarHaciendas MEJORADA
-        // ============================================
-        
-        function cargarHaciendas() {
-            console.log('Cargando datos de haciendas...');
-            
-            // Intentar cargar desde el archivo geojson
-            fetch('haciendas.geojson')
-                .then(res => {
-                    if (!res.ok) throw new Error("Error cargando datos");
-                    return res.json();
-                })
-                .then(data => {
-                    dbHaciendas = data.features || data;
-                    console.log('Datos cargados:', dbHaciendas.length, 'haciendas');
-                    processHaciendasData(dbHaciendas);
-                    mostrarToast('Datos geográficos cargados', 'success');
-                })
-                .catch(err => {
-                    console.warn("Usando datos de ejemplo:", err);
-                    crearDatosEjemplo();
-                    mostrarToast('Cargando datos de ejemplo', 'warning');
-                })
-                .finally(() => {
-                    // Ocultar splash screen después de 5 segundos
-                    setTimeout(hideSplashScreen, 5000);
-                });
-        }
+       
         
         function crearDatosEjemplo() {
             dbHaciendas = [
@@ -5131,7 +5123,39 @@
             ];
             processHaciendasData(dbHaciendas);
         }
+        // Función rápida para limpiar capas duplicadas
+function limpiarHaciendasDobles() {
+    // Remover todas las capas de haciendas del mapa
+    map.eachLayer(function(layer) {
+        if (layer instanceof L.GeoJSON || 
+            layer instanceof L.FeatureGroup || 
+            layer._layers) {
+            // Si parece ser una capa de haciendas, remuévela
+            if (layer._layers) {
+                var isHaciendaLayer = false;
+                Object.values(layer._layers).forEach(function(sublayer) {
+                    if (sublayer.feature && 
+                        (sublayer.feature.properties.Nombre || 
+                         sublayer.feature.properties.name)) {
+                        isHaciendaLayer = true;
+                    }
+                });
+                if (isHaciendaLayer) {
+                    map.removeLayer(layer);
+                }
+            }
+        }
+    });
+    
+    // Ahora agregar solo una vez
+    if (haciendasLayer && haciendasVisible) {
+        map.addLayer(haciendasLayer);
+    }
+}
+
+// Llama a esta función después de cargar los datos
+setTimeout(limpiarHaciendasDobles, 1000);
+
     </script>
 </body>
 </html>
-
