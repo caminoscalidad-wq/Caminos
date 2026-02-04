@@ -15,9 +15,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
-    <!-- Leaflet Routing Machine -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
-    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <!-- Leaflet Routing Machine (versión fija para estabilidad) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     
     <!-- Leaflet Fullscreen -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.css" />
@@ -1294,6 +1294,214 @@
             color: var(--prov-gray-dark);
         }
 
+        /* --- CUADRO FLOTANTE RUTA DINÁMICA (compacto, todo en fila) --- */
+        #floating-route-dynamic {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: auto;
+            min-width: 180px;
+            max-width: calc(100vw - 40px);
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(27, 94, 32, 0.1);
+            z-index: 1600;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid rgba(46, 125, 50, 0.08);
+            transition: var(--transition);
+        }
+
+        #floating-route-dynamic.visible {
+            display: flex;
+        }
+
+        #floating-route-dynamic .panel-body {
+            padding: 6px 8px 6px 10px;
+            background: #fafafa;
+            position: relative;
+            cursor: move;
+            user-select: none;
+        }
+
+        #floating-route-dynamic .panel-close {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.05);
+            border: none;
+            color: var(--prov-gray-medium);
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            font-size: 0.45rem;
+        }
+
+        #floating-route-dynamic .panel-close:hover {
+            background: rgba(0,0,0,0.1);
+            color: var(--prov-gray-dark);
+        }
+
+        #floating-route-dynamic .panel-content {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-right: 22px;
+        }
+
+        #floating-route-dynamic .progress-section {
+            flex: 1 1 80px;
+            min-width: 60px;
+        }
+
+        #floating-route-dynamic .progress-header {
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        #floating-route-dynamic .progress-pct {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--prov-green-dark);
+        }
+
+        #floating-route-dynamic .progress-track {
+            height: 4px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #floating-route-dynamic .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #43a047 0%, #2e7d32 100%);
+            border-radius: 4px;
+            transition: width 0.4s ease;
+        }
+
+        #floating-route-dynamic .route-stats-row {
+            display: flex;
+            gap: 4px;
+            flex: 0 0 auto;
+            margin-left: auto;
+        }
+
+        #floating-route-dynamic .route-stat {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 6px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            border: 1px solid rgba(46, 125, 50, 0.05);
+        }
+
+        #floating-route-dynamic .route-stat i {
+            font-size: 0.5rem;
+            color: var(--prov-green-main);
+        }
+
+        #floating-route-dynamic .route-stat-content .value {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--prov-green-dark);
+        }
+
+        #floating-route-dynamic .route-stat-content .label {
+            display: none;
+        }
+
+        #floating-route-dynamic .next-instruction {
+            flex: 1;
+            min-width: 0;
+            background: white;
+            border-radius: 4px;
+            padding: 4px 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            border: 1px solid rgba(46, 125, 50, 0.06);
+            border-left: 2px solid var(--prov-green-main);
+        }
+
+        #floating-route-dynamic .next-instruction .label {
+            display: none;
+        }
+
+        #floating-route-dynamic .next-instruction .text {
+            font-size: 0.62rem;
+            line-height: 1.2;
+            color: var(--prov-gray-dark);
+            font-weight: 500;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        #floating-route-dynamic .next-instruction .distance {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: 2px;
+            font-size: 0.52rem;
+            font-weight: 600;
+            color: var(--prov-green-dark);
+        }
+
+        #btn-reopen-route-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(27, 94, 32, 0.3);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1599;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        #btn-reopen-route-panel:hover {
+            transform: scale(1.05);
+        }
+
+        #btn-reopen-route-panel.visible {
+            display: flex;
+        }
+
+        @media (max-width: 768px) {
+            #floating-route-dynamic {
+                top: calc(12px + env(safe-area-inset-top, 0px));
+                left: 12px;
+                max-width: calc(100vw - 24px);
+            }
+            #floating-route-dynamic .panel-content {
+                flex-wrap: wrap;
+            }
+            #floating-route-dynamic .next-instruction {
+                flex: 1 1 100%;
+                order: 3;
+            }
+            #btn-reopen-route-panel {
+                top: calc(12px + env(safe-area-inset-top, 0px));
+                left: 12px;
+            }
+        }
+
         .voice-btn {
             border: none;
             border-radius: 8px;
@@ -2188,7 +2396,7 @@
                 </span>
                 <span class="gps-panel-value" id="gps-uptime">0s</span>
             </div>
-            <div class="gps-panel-row">
+            <div class="gps-panel-row" onclick="if(currentRoute) toggleRouteSync()" title="Clic para activar/desactivar sincronización con la ruta" style="cursor: pointer;">
                 <span class="gps-panel-label">
                     <i class="fas fa-road"></i>
                     Sincronización ruta
@@ -2597,6 +2805,48 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Cuadro flotante: resumen ruta dinámica + próxima instrucción -->
+            <div id="floating-route-dynamic">
+                <div class="panel-body" id="floating-route-drag">
+                    <button type="button" class="panel-close" onclick="closeFloatingRoutePanel()" title="Cerrar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="panel-content">
+                        <div class="progress-section">
+                            <div class="progress-header">
+                                <span class="progress-pct" id="floating-progress-pct">0%</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill" id="floating-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div class="route-stats-row">
+                            <div class="route-stat">
+                                <i class="fas fa-road"></i>
+                                <div class="route-stat-content">
+                                    <span class="value" id="floating-dist-left">--</span>
+                                </div>
+                            </div>
+                            <div class="route-stat">
+                                <i class="fas fa-clock"></i>
+                                <div class="route-stat-content">
+                                    <span class="value" id="floating-time-left">--</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="next-instruction">
+                            <div class="text" id="floating-next-instruction">--</div>
+                            <div class="distance" id="floating-next-distance"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botón para reabrir el panel cuando está cerrado -->
+            <button type="button" id="btn-reopen-route-panel" onclick="openFloatingRoutePanel()" title="Ver resumen de ruta">
+                <i class="fas fa-info-circle"></i>
+            </button>
         </main>
     </div>
         <script>
@@ -2920,9 +3170,12 @@
             // Funciones de arrastre
             function startDrag(e) {
                 if (e.target.closest && e.target.closest('.panel-btn-close')) return;
+                var clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+                var clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+                if (!clientX && !clientY) return;
                 isDragging = true;
-                startX = e.clientX || e.touches[0].clientX;
-                startY = e.clientY || e.touches[0].clientY;
+                startX = clientX;
+                startY = clientY;
                 startLeft = parseInt(panel.style.left) || panel.offsetLeft;
                 startTop = parseInt(panel.style.top) || panel.offsetTop;
                 
@@ -2990,9 +3243,10 @@
             
             // Funciones de redimensionamiento
             function startResize(e) {
+                if (e.touches && !e.touches[0]) return;
                 isResizing = true;
-                startX = e.clientX || e.touches[0].clientX;
-                startY = e.clientY || e.touches[0].clientY;
+                startX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+                startY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
                 startWidth = panel.offsetWidth;
                 startHeight = panel.offsetHeight;
                 
@@ -3293,8 +3547,8 @@
                 routePolyline = null;
             }
             
-            document.getElementById('gps-sync-status').textContent = 'Inactivo';
-            document.getElementById('gps-sync-status').style.color = '#757575';
+            var syncStatus = document.getElementById('gps-sync-status');
+            if (syncStatus) { syncStatus.textContent = 'Inactivo'; syncStatus.style.color = '#757575'; }
         }
         
         function initializeRouteSegments(route) {
@@ -3328,12 +3582,14 @@
         }
         
         function drawRouteLayers() {
-            // Limpiar capas anteriores
+            // Limpiar capas anteriores (usar LayerGroup para múltiples segmentos)
             if (routeCompletedLayer) {
                 map.removeLayer(routeCompletedLayer);
+                routeCompletedLayer = null;
             }
             if (routePendingLayer) {
                 map.removeLayer(routePendingLayer);
+                routePendingLayer = null;
             }
             
             // Crear arrays de coordenadas completadas y pendientes
@@ -3390,10 +3646,11 @@
                 }
             }
             
-            // Dibujar rutas completadas (verde)
-            completedCoords.forEach(coords => {
+            // Dibujar rutas completadas (verde) - LayerGroup para múltiples segmentos
+            var completedGroup = L.layerGroup();
+            completedCoords.forEach(function(coords) {
                 if (coords.length > 1) {
-                    routeCompletedLayer = L.polyline(coords, {
+                    L.polyline(coords, {
                         color: COLORS.completed,
                         weight: 8,
                         opacity: 0.9,
@@ -3401,14 +3658,17 @@
                         lineJoin: 'round',
                         className: 'route-completed',
                         interactive: false
-                    }).addTo(map);
+                    }).addTo(completedGroup);
                 }
             });
+            routeCompletedLayer = completedGroup;
+            if (completedGroup.getLayers().length > 0) completedGroup.addTo(map);
             
-            // Dibujar rutas pendientes (rojo con guiones)
-            pendingCoords.forEach(coords => {
+            // Dibujar rutas pendientes (rojo con guiones) - LayerGroup para múltiples segmentos
+            var pendingGroup = L.layerGroup();
+            pendingCoords.forEach(function(coords) {
                 if (coords.length > 1) {
-                    routePendingLayer = L.polyline(coords, {
+                    L.polyline(coords, {
                         color: COLORS.pending,
                         weight: 6,
                         opacity: 0.7,
@@ -3417,9 +3677,11 @@
                         lineJoin: 'round',
                         className: 'route-pending',
                         interactive: false
-                    }).addTo(map);
+                    }).addTo(pendingGroup);
                 }
             });
+            routePendingLayer = pendingGroup;
+            if (pendingGroup.getLayers().length > 0) pendingGroup.addTo(map);
             
             // Actualizar progreso
             updateRouteProgress();
@@ -3625,19 +3887,146 @@
         function updateRouteProgress() {
             if (totalRouteDistance > 0) {
                 var percent = (completedDistance / totalRouteDistance * 100);
-                document.getElementById('progress-fill').style.width = Math.min(100, percent) + '%';
-                document.getElementById('progress-percent').textContent = Math.round(Math.min(100, percent)) + '%';
-                
-                // Actualizar color basado en progreso
                 var progressFill = document.getElementById('progress-fill');
-                if (percent < 30) {
-                    progressFill.style.background = 'linear-gradient(90deg, #f44336, #ff9800)';
-                } else if (percent < 70) {
-                    progressFill.style.background = 'linear-gradient(90deg, #ff9800, #ffeb3b)';
-                } else {
-                    progressFill.style.background = 'linear-gradient(90deg, var(--prov-green-main), var(--prov-green-dark))';
+                var progressPct = document.getElementById('progress-percent');
+                if (progressFill) progressFill.style.width = Math.min(100, percent) + '%';
+                if (progressPct) progressPct.textContent = Math.round(Math.min(100, percent)) + '%';
+                if (progressFill) {
+                    if (percent < 30) progressFill.style.background = 'linear-gradient(90deg, #f44336, #ff9800)';
+                    else if (percent < 70) progressFill.style.background = 'linear-gradient(90deg, #ff9800, #ffeb3b)';
+                    else progressFill.style.background = 'linear-gradient(90deg, var(--prov-green-main), var(--prov-green-dark))';
+                }
+                updateFloatingRoutePanel();
+            }
+        }
+        
+        function translateInstruction(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/Continue on/g, 'Continúe por')
+                .replace(/Turn left/g, 'Gire a la izquierda')
+                .replace(/Turn right/g, 'Gire a la derecha')
+                .replace(/sharp left/gi, 'gire bruscamente a la izquierda')
+                .replace(/sharp right/gi, 'gire bruscamente a la derecha')
+                .replace(/slight left/gi, 'gire ligeramente a la izquierda')
+                .replace(/slight right/gi, 'gire ligeramente a la derecha')
+                .replace(/Destination reached/gi, 'Ha llegado a su destino')
+                .replace(/Head /gi, 'Avance ')
+                .replace(/Take the /gi, 'Tome ')
+                .replace(/roundabout/gi, 'glorieta')
+                .replace(/exit/gi, 'salida')
+                .replace(/then/gi, 'luego')
+                .replace(/and /gi, 'y ');
+        }
+        
+        function getNextInstruction() {
+            if (!currentRoute || !currentRoute.instructions || currentRoute.instructions.length === 0) return null;
+            var cumulative = 0;
+            for (var i = 0; i < currentRoute.instructions.length; i++) {
+                var instrStart = cumulative;
+                cumulative += currentRoute.instructions[i].distance;
+                if (completedDistance < cumulative) {
+                    return currentRoute.instructions[i];
                 }
             }
+            return null;
+        }
+        
+        function updateFloatingRoutePanel() {
+            var panel = document.getElementById('floating-route-dynamic');
+            if (!panel || !currentRoute) return;
+            
+            var totalDist = totalRouteDistance || currentRoute.summary.totalDistance || 0;
+            var distLeft = totalDist - completedDistance;
+            var distLeftKm = totalDist > 0 ? (distLeft / 1000).toFixed(1) : (currentRoute.summary.totalDistance / 1000).toFixed(1);
+            var totalMin = Math.round(currentRoute.summary.totalTime / 60);
+            var timeLeftMin = totalDist > 0 ? Math.round((distLeft / totalDist) * totalMin) : totalMin;
+            var percent = totalDist > 0 ? (completedDistance / totalDist * 100) : 0;
+            percent = Math.min(100, Math.max(0, percent));
+            
+            var progressFill = document.getElementById('floating-progress-fill');
+            var progressPct = document.getElementById('floating-progress-pct');
+            var distLeftEl = document.getElementById('floating-dist-left');
+            var timeLeftEl = document.getElementById('floating-time-left');
+            var nextText = document.getElementById('floating-next-instruction');
+            var nextDist = document.getElementById('floating-next-distance');
+            
+            if (progressFill) progressFill.style.width = percent + '%';
+            if (progressPct) progressPct.textContent = Math.round(percent) + '%';
+            if (distLeftEl) distLeftEl.textContent = distLeftKm + ' km';
+            if (timeLeftEl) timeLeftEl.textContent = timeLeftMin + ' min';
+            
+            var nextInstr = getNextInstruction();
+            if (nextText) nextText.textContent = nextInstr ? translateInstruction(nextInstr.text) : (percent >= 100 ? 'Ha llegado a su destino' : '--');
+            if (nextDist) {
+                if (nextInstr && nextInstr.distance > 0) {
+                    nextDist.innerHTML = '<i class="fas fa-map-marker-alt"></i> ' + (nextInstr.distance >= 1000 ? (nextInstr.distance/1000).toFixed(1) + ' km' : Math.round(nextInstr.distance) + ' m');
+                    nextDist.style.display = 'inline-flex';
+                } else {
+                    nextDist.innerHTML = '';
+                    nextDist.style.display = 'none';
+                }
+            }
+        }
+        
+        var floatingRoutePanelClosed = false;
+        
+        function openFloatingRoutePanel() {
+            var panel = document.getElementById('floating-route-dynamic');
+            var btnReopen = document.getElementById('btn-reopen-route-panel');
+            if (panel) { panel.classList.add('visible'); panel.style.display = 'flex'; }
+            if (btnReopen) btnReopen.classList.remove('visible');
+            floatingRoutePanelClosed = false;
+        }
+        
+        function closeFloatingRoutePanel() {
+            var panel = document.getElementById('floating-route-dynamic');
+            var btnReopen = document.getElementById('btn-reopen-route-panel');
+            if (panel) { panel.classList.remove('visible'); panel.style.display = 'none'; }
+            if (btnReopen && currentRoute) btnReopen.classList.add('visible');
+            floatingRoutePanelClosed = true;
+        }
+        
+        function toggleFloatingRoutePanel() {
+            if (floatingRoutePanelClosed) openFloatingRoutePanel();
+            else closeFloatingRoutePanel();
+        }
+        
+        function setupFloatingRoutePanelDrag() {
+            var panel = document.getElementById('floating-route-dynamic');
+            var header = document.getElementById('floating-route-drag');
+            if (!panel || !header) return;
+            var active = false, startX, startY, startLeft, startTop;
+            function dragStart(e) {
+                if (e.target.closest('.panel-close')) return;
+                active = true;
+                startX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+                startY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+                startLeft = parseInt(panel.style.left) || 20;
+                startTop = parseInt(panel.style.top) || 20;
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchmove', drag);
+                document.addEventListener('touchend', dragEnd);
+            }
+            function drag(e) {
+                if (!active) return;
+                var x = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+                var y = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+                var newLeft = Math.max(10, Math.min(window.innerWidth - 200, startLeft + (x - startX)));
+                var newTop = Math.max(10, Math.min(window.innerHeight - 60, startTop + (y - startY)));
+                panel.style.left = newLeft + 'px';
+                panel.style.top = newTop + 'px';
+            }
+            function dragEnd() {
+                active = false;
+                document.removeEventListener('mousemove', drag);
+                document.removeEventListener('mouseup', dragEnd);
+                document.removeEventListener('touchmove', drag);
+                document.removeEventListener('touchend', dragEnd);
+            }
+            header.addEventListener('mousedown', dragStart);
+            header.addEventListener('touchstart', dragStart);
         }
         
         function toggleRouteSync() {
@@ -3854,11 +4243,14 @@
             }
             
             // Ocultar panel de GPS
-            document.getElementById('gps-panel').style.display = 'none';
-            document.getElementById('btn-gps-panel').style.display = 'none';
-            document.getElementById('btn-gps-panel').classList.remove('active');
-            document.getElementById('btn-gps-track').classList.remove('active');
-            document.getElementById('btn-gps-track-bottom').classList.remove('active');
+            var gpsPanel = document.getElementById('gps-panel');
+            var btnGpsPanel = document.getElementById('btn-gps-panel');
+            var btnTrack = document.getElementById('btn-gps-track');
+            var btnTrackBottom = document.getElementById('btn-gps-track-bottom');
+            if (gpsPanel) gpsPanel.style.display = 'none';
+            if (btnGpsPanel) { btnGpsPanel.style.display = 'none'; btnGpsPanel.classList.remove('active'); }
+            if (btnTrack) btnTrack.classList.remove('active');
+            if (btnTrackBottom) btnTrackBottom.classList.remove('active');
             var navGps = document.getElementById('nav-gps');
             if (navGps) navGps.classList.remove('active');
             
@@ -3988,29 +4380,7 @@
         }
         
         // ============================================
-        // 8. INICIALIZACIÓN MEJORADA
-        // ============================================
-        
-        function initSearchEvents() {
-            ['origen', 'inter', 'dest'].forEach(function(tipo) {
-                var input = document.getElementById('input-' + tipo);
-                if (input) {
-                    input.addEventListener('input', function() { buscar(tipo); });
-                    input.addEventListener('keyup', function() { buscar(tipo); });
-                }
-            });
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.input-search-wrapper') && !e.target.closest('.search-results') && !e.target.matches('input[type="text"]')) {
-                    document.querySelectorAll('.search-results').forEach(function(list) {
-                        list.classList.remove('active');
-                        list.style.display = 'none';
-                    });
-                }
-            });
-        }
-        
-        // ============================================
-        // 10. CARGA DE DATOS GEOESPACIALES
+        // 8. CARGA DE DATOS GEOESPACIALES
         // ============================================
         
         function cargarHaciendas() {
@@ -4201,6 +4571,13 @@
             var props = feature.properties || {};
             return props.Nombre || props.name || props.NOMBRE || 
                    props.Hacienda || props.nombre || "Ubicación sin nombre";
+        }
+        
+        function escapeHtml(str) {
+            if (str == null) return '';
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
         
         function getArea(feature) {
@@ -4433,11 +4810,11 @@
                         </div>
                     `);
                 }
-                // Ocultar resumen flotante (distancia/tiempo) - no necesario
-                var floatingSummary = document.getElementById('route-summary-floating');
-                if (floatingSummary) {
-                    floatingSummary.style.display = 'none';
-                }
+                // Mostrar cuadro flotante de ruta dinámica
+                openFloatingRoutePanel();
+                updateFloatingRoutePanel();
+                var btnReopen = document.getElementById('btn-reopen-route-panel');
+                if (btnReopen) btnReopen.classList.remove('visible');
                 // Instrucciones: escritorio panel flotante, móvil solo voz desde resumen
                 setTimeout(() => {
                     if (window.innerWidth > 768) {
@@ -4479,6 +4856,7 @@
             
             // Actualizar visualización
             mostrarDatosRuta(currentRoute);
+            updateFloatingRoutePanel();
             
             // Ajustar vista
             var bounds = L.latLngBounds(currentRoute.coordinates);
@@ -4640,15 +5018,11 @@
         function createInstructionStep(num, text, distance, iconClass) {
             var div = document.createElement('div');
             div.className = 'instruction-step';
-            div.innerHTML = `
-                <div class="step-icon">
-                    <i class="${iconClass}"></i>
-                </div>
-                <div class="step-content">
-                    <div class="step-text">${text}</div>
-                </div>
-                <div class="step-dist">${distance}</div>
-            `;
+            var textSafe = (typeof text === 'string') ? escapeHtml(text) : '';
+            var distSafe = (typeof distance === 'string') ? escapeHtml(distance) : String(distance || '');
+            div.innerHTML = '<div class="step-icon"><i class="' + (iconClass || 'fas fa-arrow-up') + '"></i></div>' +
+                '<div class="step-content"><div class="step-text">' + textSafe + '</div></div>' +
+                '<div class="step-dist">' + distSafe + '</div>';
             return div;
         }
         
@@ -4880,6 +5254,12 @@
             if (routeFloating) routeFloating.style.display = 'none';
             
             toggleInstrucciones(false);
+            
+            // Ocultar cuadro flotante de ruta dinámica
+            var panel = document.getElementById('floating-route-dynamic');
+            var btnReopen = document.getElementById('btn-reopen-route-panel');
+            if (panel) { panel.classList.remove('visible'); panel.style.display = 'none'; }
+            if (btnReopen) btnReopen.classList.remove('visible');
             
             mostrarToast('Ruta eliminada del mapa', 'info');
         }
@@ -5222,8 +5602,8 @@
             }
         }
 
-                // ============================================
-        // 9. FUNCIONES DE BÚSQUEDA RESTAURADAS
+        // ============================================
+        // 9. FUNCIONES DE BÚSQUEDA
         // ============================================
         
         // Función para inicializar eventos de búsqueda
@@ -5262,9 +5642,11 @@
         function buscar(tipo) {
             var inputId = 'input-' + tipo;
             var listId = 'list-' + tipo;
-            var txt = document.getElementById(inputId).value.trim().toLowerCase();
+            var inputEl = document.getElementById(inputId);
             var lista = document.getElementById(listId);
+            if (!inputEl || !lista) return;
             
+            var txt = inputEl.value.trim().toLowerCase();
             lista.innerHTML = "";
             lista.style.display = "none";
             
@@ -5290,35 +5672,28 @@
             }
             
             var resultados = dbHaciendas
-                .map(h => {
+                .map(function(h) {
                     var nombre = getNombre(h);
                     var nombreLower = nombre.toLowerCase();
                     var score = 0;
-                    
                     if (nombreLower.startsWith(txt)) score += 100;
-                    if (nombreLower.includes(' ' + txt + ' ')) score += 50;
-                    if (nombreLower.includes(txt)) score += 30;
-                    
+                    if (nombreLower.indexOf(' ' + txt + ' ') >= 0) score += 50;
+                    if (nombreLower.indexOf(txt) >= 0) score += 30;
                     return { hacienda: h, nombre: nombre, score: score };
                 })
-                .filter(item => item.score > 0)
-                .sort((a, b) => b.score - a.score)
+                .filter(function(item) { return item.score > 0; })
+                .sort(function(a, b) { return b.score - a.score; })
                 .slice(0, 8)
-                .map(item => item.hacienda);
+                .map(function(item) { return item.hacienda; });
             
             if (resultados.length > 0) {
-                resultados.forEach(h => {
+                resultados.forEach(function(h) {
                     var li = document.createElement("li");
                     var nombre = getNombre(h);
-                    
                     var areaStr = getArea(h);
-                    li.innerHTML = `
-                        <i class="fas fa-map-marker-alt"></i>
-                        <div style="flex: 1;">
-                            <strong>${nombre}</strong>
-                            ${areaStr ? `<br><small>Área: ${areaStr} ha</small>` : ''}
-                        </div>
-                    `;
+                    var nombreSafe = escapeHtml(nombre);
+                    var areaSafe = areaStr ? escapeHtml(String(areaStr)) : '';
+                    li.innerHTML = '<i class="fas fa-map-marker-alt"></i><div style="flex: 1;"><strong>' + nombreSafe + '</strong>' + (areaSafe ? '<br><small>Área: ' + areaSafe + ' ha</small>' : '') + '</div>';
                     
                     li.onclick = function() {
                         try {
@@ -5326,18 +5701,14 @@
                             var centro = tempLayer.getBounds().getCenter();
                             setPunto(tipo, centro, nombre);
                             lista.style.display = "none";
-                            mostrarToast(`Ubicación establecida: ${nombre}`, 'success');
-                            
-                            // En móvil, cerrar el teclado virtual
+                            mostrarToast('Ubicación establecida: ' + nombre, 'success');
                             if (window.innerWidth <= 768) {
-                                document.getElementById(inputId).blur();
+                                inputEl.blur();
                             }
-                        } catch (e) {
-                            console.error('Error al establecer ubicación:', e);
+                        } catch (err) {
                             mostrarToast('Error al establecer ubicación', 'error');
                         }
                     };
-                    
                     lista.appendChild(li);
                 });
                 
@@ -5363,11 +5734,12 @@
             cargarHaciendas();
             
             // Inicializar componentes CRÍTICOS PRIMERO
-            initSearchEvents();  // <-- ESTA LÍNEA ES CLAVE
+            initSearchEvents();
             initLayers();
             initSpeechSynthesis();
             setupOrientationControls();
             setupMapInteractions();
+            setupFloatingRoutePanelDrag();
             
             // Evento de clic en mapa (único manejador centralizado)
             if (!window._mapClickInited) {
@@ -5487,4 +5859,5 @@
     </script>
 </body>
 </html>
+
 
