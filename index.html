@@ -2910,9 +2910,17 @@
             minZoom: 10,
             crossOrigin: true
         });
+        
+        var sateliteLabels = L.tileLayer('https://cartodb-basemaps-a.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}.png', {
+            attribution: '© CartoDB',
+            maxZoom: 19,
+            minZoom: 10,
+            pane: 'overlayPane'
+        });
 
-        // Añadir capa SATELITAL por defecto (REQUERIMIENTO)
+        // Añadir capa SATELITAL y etiquetas por defecto (REQUERIMIENTO)
         satelite.addTo(map);
+        sateliteLabels.addTo(map);
         
         // Configurar controles con posición fija
         var zoomControl = L.control.zoom({ 
@@ -2946,6 +2954,11 @@
         var voiceGuidanceActive = false;
         var lastSpokenInstructionIndex = -1;
         var VOICE_LEAD_METERS = 250;
+        var offRouteCount = 0;
+        var OFF_ROUTE_THRESHOLD_M = 80;
+        var OFF_ROUTE_COUNT_TO_RECALC = 3;
+        var lastRecalcTime = 0;
+        var RECALC_COOLDOWN_MS = 15000;
 
         // Variables para GPS en tiempo real
         var gpsMarker = null;
@@ -3532,6 +3545,7 @@
             totalRouteDistance = 0;
             routeSegments = [];
             lastSpokenInstructionIndex = -1;
+            offRouteCount = 0;
             
             // Limpiar capas anteriores
             if (routeCompletedLayer) {
@@ -3558,6 +3572,7 @@
             completedDistance = 0;
             routeSegments = [];
             lastSpokenInstructionIndex = -1;
+            offRouteCount = 0;
             
             // Crear segmentos de ruta
             for (let i = 0; i < route.coordinates.length - 1; i++) {
@@ -3695,11 +3710,9 @@
             var minDistance = Infinity;
             var nearestPoint = null;
             
-            // Encontrar el segmento más cercano
             for (let i = 0; i < routeSegments.length; i++) {
                 var segment = routeSegments[i];
                 var result = findNearestPointOnSegment(userPosition, segment.start, segment.end);
-                
                 if (result.distance < minDistance) {
                     minDistance = result.distance;
                     nearestSegmentIndex = i;
@@ -3707,7 +3720,20 @@
                 }
             }
             
-            // Si está cerca de la ruta (dentro de 50 metros)
+            if (nearestSegmentIndex >= 0 && minDistance >= OFF_ROUTE_THRESHOLD_M) {
+                offRouteCount++;
+                if (offRouteCount >= OFF_ROUTE_COUNT_TO_RECALC) {
+                    var now = Date.now();
+                    if (now - lastRecalcTime > RECALC_COOLDOWN_MS && puntos.dest) {
+                        lastRecalcTime = now;
+                        offRouteCount = 0;
+                        recalcularRutaDesdePosicion(userPosition);
+                    }
+                }
+            } else {
+                offRouteCount = 0;
+            }
+            
             if (nearestSegmentIndex >= 0 && minDistance < 50) {
                 var currentSegment = routeSegments[nearestSegmentIndex];
                 
@@ -3753,29 +3779,41 @@
                 if (voiceGuidanceActive && currentRoute && currentRoute.instructions) {
                     checkAndSpeakNextInstruction();
                 }
+            } else if (voiceGuidanceActive && gpsTracking && currentRoute && currentRoute.instructions) {
+                checkAndSpeakNextInstruction();
             }
+        }
+        
+        function recalcularRutaDesdePosicion(latlng) {
+            if (!puntos.dest) return;
+            mostrarToast('Recalculando ruta desde tu posición...', 'info');
+            setPunto('origen', latlng, 'Posición actual');
         }
         
         function checkAndSpeakNextInstruction() {
             if (!currentRoute || !currentRoute.instructions || !speechEnabled) return;
             var cumulative = 0;
             for (var i = 0; i < currentRoute.instructions.length; i++) {
+                var instr = currentRoute.instructions[i];
+                var instrDist = (instr && (instr.distance != null || instr.length != null)) ? (instr.distance || instr.length) : 0;
                 var instrStart = cumulative;
                 if (i <= lastSpokenInstructionIndex) {
-                    cumulative += currentRoute.instructions[i].distance;
+                    cumulative += instrDist;
                     continue;
                 }
                 if (completedDistance + VOICE_LEAD_METERS >= instrStart) {
                     lastSpokenInstructionIndex = i;
-                    speakSingleInstruction(currentRoute.instructions[i], i + 1);
+                    speakSingleInstruction(instr, i + 1);
                     break;
                 }
-                cumulative += currentRoute.instructions[i].distance;
+                cumulative += instrDist;
             }
         }
         
         function speakSingleInstruction(step, stepNum) {
-            if (!speechEnabled || speechSynthesis.speaking) return;
+            if (!speechEnabled) return;
+            if (speechSynthesis.speaking) { speechSynthesis.cancel(); }
+            if (!step || !step.text) return;
             var cleanText = step.text
                 .replace(/Continue on/g, "Continúe por")
                 .replace(/Turn left/g, "Gire a la izquierda")
@@ -3791,9 +3829,10 @@
                 .replace(/exit/gi, "salida")
                 .replace(/then/gi, "luego")
                 .replace(/and /gi, "y ");
-            var distancia = step.distance > 1000 ? 
-                (step.distance/1000).toFixed(1) + " kilómetros" : 
-                Math.round(step.distance) + " metros";
+            var dist = step.distance != null ? step.distance : (step.length != null ? step.length : 0);
+            var distancia = dist > 1000 ? 
+                (dist/1000).toFixed(1) + " kilómetros" : 
+                Math.round(dist) + " metros";
             var text = stepNum + ". " + cleanText + " en " + distancia + ".";
             var utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'es-ES';
@@ -3816,6 +3855,18 @@
             }
             if (btnEl) btnEl.classList.toggle('active', voiceGuidanceActive);
             mostrarToast(voiceGuidanceActive ? 'Voz guiada activada' : 'Voz guiada desactivada', voiceGuidanceActive ? 'success' : 'info');
+            if (voiceGuidanceActive && speechEnabled) {
+                setTimeout(function() {
+                    if (!speechSynthesis.speaking) {
+                        var u = new SpeechSynthesisUtterance('Voz guiada activada.');
+                        u.lang = 'es-ES';
+                        u.rate = 1.2;
+                        u.volume = 0.8;
+                        if (spanishVoice) u.voice = spanishVoice;
+                        speechSynthesis.speak(u);
+                    }
+                }, 300);
+            }
         }
         
         function findNearestPointOnSegment(point, segmentStart, segmentEnd) {
@@ -4132,9 +4183,11 @@
                 gpsAccuracyCircle.setRadius(accuracy);
             }
             
-            // Línea de trayectoria
-            gpsTrackPoints.push([latlng.lat, latlng.lng]);
-            updateGpsTrack();
+            // Línea de trayectoria (no añadir puntos cuando la app está oculta para evitar líneas largas)
+            if (!document.hidden) {
+                gpsTrackPoints.push([latlng.lat, latlng.lng]);
+                updateGpsTrack();
+            }
             
             // Actualizar panel de GPS
             updateGpsPanel(position);
@@ -5477,6 +5530,7 @@
             map.removeLayer(calles);
             map.removeLayer(satelite);
             map.removeLayer(topografico);
+            if (map.hasLayer(sateliteLabels)) map.removeLayer(sateliteLabels);
             if (tipo === 'carreteras') {
                 calles.addTo(map);
                 mostrarToast('Vista carreteras activada', 'info');
@@ -5485,6 +5539,7 @@
                 mostrarToast('Vista topográfica activada', 'info');
             } else {
                 satelite.addTo(map);
+                sateliteLabels.addTo(map);
                 mostrarToast('Vista satélite activada', 'info');
             }
         }
