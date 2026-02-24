@@ -2996,6 +2996,7 @@
         var completedDistance = 0;
         var totalRouteDistance = 0;
         var routePolyline = null;
+        var recalculandoDesdeGps = false;
 
         // Colores personalizados
         const COLORS = {
@@ -3127,6 +3128,7 @@
         
         function abrirPanelGps() {
             var panel = document.getElementById('gps-panel');
+            if (!panel) return;
             var btn = document.getElementById('btn-gps-panel');
             var btnBottom = document.getElementById('btn-gps-track-bottom');
             var navInfo = document.getElementById('nav-info');
@@ -3149,6 +3151,7 @@
         
         function cerrarPanelGps() {
             var panel = document.getElementById('gps-panel');
+            if (!panel) return;
             var btn = document.getElementById('btn-gps-panel');
             var btnBottom = document.getElementById('btn-gps-track-bottom');
             var navInfo = document.getElementById('nav-info');
@@ -3786,6 +3789,7 @@
         
         function recalcularRutaDesdePosicion(latlng) {
             if (!puntos.dest) return;
+            recalculandoDesdeGps = true;
             mostrarToast('Recalculando ruta desde tu posición...', 'info');
             setPunto('origen', latlng, 'Posición actual', false);
         }
@@ -4657,8 +4661,12 @@
             // Actualizar estado
             actualizarEstadoApp();
             
-            // Centrar mapa
-            map.setView(latlng, 14);
+            // Centrar mapa: si es recalc desde GPS, mantener zoom actual; si no, zoom 14
+            if (nombre === 'Posición actual') {
+                map.setView(latlng, map.getZoom());
+            } else {
+                map.setView(latlng, 14);
+            }
             
             if (modoManual === tipo) {
                 document.getElementById('map').style.cursor = '';
@@ -4807,10 +4815,21 @@
                 // Mostrar datos de la ruta
                 mostrarDatosRuta(currentRoute);
                 
-                // Ajustar vista a la ruta completa
-                if (rutasEncontradas.length > 0) {
-                    var bounds = L.latLngBounds(rutasEncontradas[0].coordinates);
-                    map.fitBounds(bounds, { padding: [100, 100], maxZoom: 15 });
+                var esRecalcGps = recalculandoDesdeGps;
+                if (recalculandoDesdeGps) recalculandoDesdeGps = false;
+                
+                if (esRecalcGps) {
+                    // Recalculo por GPS: centrar en mi posición, no abrir paneles
+                    var centro = userPosition || puntos.origen;
+                    if (centro) {
+                        map.setView(centro, Math.max(map.getZoom(), 14));
+                    }
+                } else {
+                    // Cálculo normal: ajustar vista a la ruta completa
+                    if (rutasEncontradas.length > 0) {
+                        var bounds = L.latLngBounds(rutasEncontradas[0].coordinates);
+                        map.fitBounds(bounds, { padding: [100, 100], maxZoom: 15 });
+                    }
                 }
                 
                 // Actualizar UI
@@ -4846,17 +4865,21 @@
                         </div>
                     `);
                 }
-                // Mostrar cuadro flotante de ruta dinámica
-                openFloatingRoutePanel();
-                updateFloatingRoutePanel();
-                var btnReopen = document.getElementById('btn-reopen-route-panel');
-                if (btnReopen) btnReopen.classList.remove('visible');
-                // Instrucciones: escritorio panel flotante, móvil solo voz desde resumen
-                setTimeout(() => {
-                    if (window.innerWidth > 768) {
-                        toggleInstrucciones(true);
-                    }
-                }, 500);
+                
+                if (!esRecalcGps) {
+                    // Solo abrir paneles cuando el usuario calcula la ruta manualmente
+                    openFloatingRoutePanel();
+                    updateFloatingRoutePanel();
+                    var btnReopen = document.getElementById('btn-reopen-route-panel');
+                    if (btnReopen) btnReopen.classList.remove('visible');
+                    setTimeout(() => {
+                        if (window.innerWidth > 768) {
+                            toggleInstrucciones(true);
+                        }
+                    }, 500);
+                } else {
+                    updateFloatingRoutePanel();
+                }
                 
                 // Sincronizar ruta solo si GPS ya estaba activo
                 if (gpsTracking) {
@@ -5831,7 +5854,8 @@
                 var orientationPanel = document.getElementById('orientation-panel');
                 var btnOrientation = document.getElementById('btn-orientation-bottom');
                 
-                if (layerControls.style.display === 'flex' && 
+                if (layerControls && btnLayers &&
+                    layerControls.style.display === 'flex' && 
                     !layerControls.contains(e.target) && 
                     !btnLayers.contains(e.target)) {
                     var navCapas = document.getElementById('nav-capas');
@@ -5842,7 +5866,8 @@
                     }
                 }
                 
-                if (orientationPanel.style.display === 'flex' && 
+                if (orientationPanel && btnOrientation &&
+                    orientationPanel.style.display === 'flex' && 
                     !orientationPanel.contains(e.target) && 
                     !btnOrientation.contains(e.target)) {
                     var navOrient = document.getElementById('nav-orientacion');
