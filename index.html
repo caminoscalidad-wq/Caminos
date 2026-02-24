@@ -3787,7 +3787,7 @@
         function recalcularRutaDesdePosicion(latlng) {
             if (!puntos.dest) return;
             mostrarToast('Recalculando ruta desde tu posición...', 'info');
-            setPunto('origen', latlng, 'Posición actual');
+            setPunto('origen', latlng, 'Posición actual', false);
         }
         
         function checkAndSpeakNextInstruction() {
@@ -4414,24 +4414,6 @@
             );
         }
         
-        // Función calcularRuta actualizada para usar movimiento suave
-        function calcularRuta() {
-            // [Código existente de validaciones...]
-            
-            // Después de calcular la ruta, centrar suavemente
-            if (rutasEncontradas.length > 0) {
-                var bounds = L.latLngBounds(rutasEncontradas[0].coordinates);
-                map.fitBounds(bounds, { 
-                    padding: [100, 100],
-                    maxZoom: 15,
-                    animate: true,
-                    duration: 1.5
-                });
-            }
-            
-            // [Resto del código existente...]
-        }
-        
         // ============================================
         // 8. CARGA DE DATOS GEOESPACIALES
         // ============================================
@@ -4644,7 +4626,8 @@
         // 11. GESTIÓN DE PUNTOS EN EL MAPA
         // ============================================
         
-        function setPunto(tipo, latlng, nombre) {
+        function setPunto(tipo, latlng, nombre, abrirPopup) {
+            if (abrirPopup === undefined) abrirPopup = true;
             // Eliminar marcador anterior
             if (markers[tipo]) {
                 map.removeLayer(markers[tipo]);
@@ -4664,8 +4647,8 @@
                     </strong>
                     <div style="font-size: 0.95em; margin-top: 4px;">${nombre}</div>
                 </div>
-            `)
-            .openPopup();
+            `);
+            if (abrirPopup) markers[tipo].openPopup();
             
             // Guardar punto
             puntos[tipo] = latlng;
@@ -5295,6 +5278,13 @@
             currentRoute = null;
             rutasEncontradas = [];
             
+            // Detener intervalo de progreso y sincronización de ruta
+            if (window.progressInterval) {
+                clearInterval(window.progressInterval);
+                window.progressInterval = null;
+            }
+            stopRouteSync();
+            
             // Limpiar capas de ruta dinámica
             setupDynamicRouteSync();
             
@@ -5313,6 +5303,7 @@
             var btnReopen = document.getElementById('btn-reopen-route-panel');
             if (panel) { panel.classList.remove('visible'); panel.style.display = 'none'; }
             if (btnReopen) btnReopen.classList.remove('visible');
+            floatingRoutePanelClosed = true;
             
             mostrarToast('Ruta eliminada del mapa', 'info');
         }
